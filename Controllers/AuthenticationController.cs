@@ -34,7 +34,7 @@ namespace healthmate_backend.Controllers
         {
             try
             {
-                var token = await _authService.LoginAsync(request.Username, request.Password, request.Role);
+                var token = await _authService.LoginAsync(request.Username, request.Password);
                 return Ok(new { message = "Login successful", token });
             }
             catch (Exception ex)
