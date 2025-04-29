@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("healthmate-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c50911d8a76b4ebdaecee4bf6f2f312bc89a321e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44cbdb3c38efeea7ce52adafff7f757040a0b2b6")]
 [assembly: System.Reflection.AssemblyProductAttribute("healthmate-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("healthmate-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
