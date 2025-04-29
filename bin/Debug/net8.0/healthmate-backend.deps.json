@@ -10,7 +10,8 @@
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "8.0.12",
           "MySql.Data": "9.3.0",
-          "Swashbuckle.AspNetCore": "6.6.2"
+          "Swashbuckle.AspNetCore": "6.6.2",
+          "System.Text.Json": "9.0.0"
         },
         "runtime": {
           "healthmate-backend.dll": {}

@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\healthmate-backend.props" />
+</Project>
