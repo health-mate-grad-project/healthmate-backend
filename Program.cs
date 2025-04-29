@@ -1,44 +1,20 @@
-using System;
-using healthmate_backend.Database;
 using healthmate_backend.Models;
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure; // <-- Important
 
-class Program
-{
-    static void Main(string[] args)
-    {
-        string connectionString = "server=mysql-2dbc541a-healthmate.k.aivencloud.com;" +
-                                  "port=15855;" +
-                                  "database=defaultdb;" +
-                                  "user=avnadmin;" +
-                                  "password=AVNS_lhFXyGW3wGvurVtSCVi;" +
-                                  "SslMode=Required;" +
-                                  "AllowPublicKeyRetrieval=True;";
+var builder = WebApplication.CreateBuilder(args);
 
-        var repo = new UserRepository(connectionString);
+// Your MySQL connection string
+var connectionString = "server=mysql-2dbc541a-healthmate.k.aivencloud.com;port=15855;database=defaultdb;user=avnadmin;password=AVNS_lhFXyGW3wGvurVtSCVi;SslMode=Required;";
 
-        // Create
-        repo.CreateUser(new User { Name = "Alice", Email = "alice@aiven.com" });
+// Add services to the container
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(
+        connectionString,
+        new MySqlServerVersion(new Version(8, 0, 35)) // <-- your MySQL server version
+    )
+);
 
-        // Read
-        var users = repo.GetAllUsers();
-        Console.WriteLine("👥 Users:");
-        foreach (var user in users)
-        {
-            Console.WriteLine($"{user.Id}: {user.Name} - {user.Email}");
-        }
+var app = builder.Build();
 
-        // Update
-        if (users.Count > 0)
-        {
-            repo.UpdateUserEmail(users[0].Id, "updated@aiven.com");
-        }
-
-        // Delete
-        if (users.Count > 1)
-        {
-            repo.DeleteUser(users[1].Id);
-        }
-        repo.PrintDatabaseSchema();
-
-    }
-}
+app.Run();
