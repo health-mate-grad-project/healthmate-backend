@@ -10,7 +10,9 @@ namespace healthmate_backend.Database
                                                 "database=defaultdb;" +
                                                 "user=avnadmin;" +
                                                 "password=AVNS_lhFXyGW3wGvurVtSCVi;" +
-                                                "SslMode=Required;";
+                                                "SslMode=Required;"+
+                                                "AllowPublicKeyRetrieval=True;"
+                                                ;
 
         public static MySqlConnection GetConnection()
         {
