@@ -41,12 +41,16 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
         ValidateIssuer = false,
-        ValidateAudience = false
+        ValidateAudience = false,
+    	ValidateLifetime = true,
+    	RoleClaimType = "Role"
     };
 });
 
 // Add Controllers
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+builder.Services.AddScoped<PatientService>();
 
 var app = builder.Build();
 

@@ -52,6 +52,14 @@ C:\Users\PC\RiderProjects\healthmate-backend\obj\Debug\net8.0\refint\healthmate-
 C:\Users\PC\RiderProjects\healthmate-backend\obj\Debug\net8.0\healthmate-backend.pdb
 C:\Users\PC\RiderProjects\healthmate-backend\obj\Debug\net8.0\healthmate-backend.genruntimeconfig.cache
 C:\Users\PC\RiderProjects\healthmate-backend\obj\Debug\net8.0\ref\healthmate-backend.dll
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.csproj.AssemblyReference.cache
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.GeneratedMSBuildEditorConfig.editorconfig
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.AssemblyInfoInputs.cache
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.AssemblyInfo.cs
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.csproj.CoreCompileInputs.cache
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.MvcApplicationPartsAssemblyInfo.cs
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.MvcApplicationPartsAssemblyInfo.cache
+G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.sourcelink.json
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\appsettings.Development.json
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\appsettings.json
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\healthmate-backend.exe
@@ -59,12 +67,14 @@ G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\healthmate-backend.dep
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\healthmate-backend.runtimeconfig.json
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\healthmate-backend.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\healthmate-backend.pdb
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Google.Protobuf.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Humanizer.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\K4os.Compression.LZ4.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\K4os.Compression.LZ4.Streams.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\K4os.Hash.xxHash.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
@@ -81,6 +91,12 @@ G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.Extensions.D
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.Extensions.Hosting.Abstractions.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.OpenApi.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Mono.TextTemplating.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\MySql.Data.dll
@@ -96,6 +112,7 @@ G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Composition.Hos
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Composition.Runtime.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Composition.TypedParts.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.IO.Pipelines.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
@@ -165,14 +182,6 @@ G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\runtimes\win-x64\nativ
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Windows.Extensions.dll
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.csproj.AssemblyReference.cache
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.GeneratedMSBuildEditorConfig.editorconfig
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.AssemblyInfoInputs.cache
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.AssemblyInfo.cs
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.csproj.CoreCompileInputs.cache
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.MvcApplicationPartsAssemblyInfo.cs
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.MvcApplicationPartsAssemblyInfo.cache
-G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.sourcelink.json
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\staticwebassets.build.json
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\staticwebassets.development.json
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\staticwebassets\msbuild.healthmate-backend.Microsoft.AspNetCore.StaticWebAssets.props
@@ -187,12 +196,3 @@ G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\refint\healthmate-back
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.pdb
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.genruntimeconfig.cache
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\ref\healthmate-backend.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
-G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
