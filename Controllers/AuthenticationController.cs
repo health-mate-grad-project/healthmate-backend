@@ -1,46 +1,57 @@
 using Microsoft.AspNetCore.Mvc;
-using healthmate_backend.Models;
 using healthmate_backend.Services;
-//comment 
+
 namespace healthmate_backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class AuthenticationController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly AuthenticationService _authService;
 
-        public AuthenticationController(AuthService authService)
+        public AuthenticationController(AuthenticationService authService)
         {
             _authService = authService;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User user)
+        public async Task<IActionResult> Register(
+            string username,
+            string password,
+            string role,
+            string email,
+            bool acceptedTerms)
         {
             try
             {
-                var registeredUser = await _authService.RegisterAsync(user, user.Password);
-                return Ok(new { message = "User registered successfully", user = registeredUser });
+                var user = await _authService.RegisterAsync(username, password, role, email, acceptedTerms);
+                return Ok(new { message = "User registered successfully", user.Id, user.Username, user.Email, Role = role });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = "Registration failed", error = ex.Message });
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] User user)
+        public async Task<IActionResult> Login(string username, string password)
         {
             try
             {
-                var loggedInUser = await _authService.LoginAsync(user.Username, user.Password);
-                return Ok(new { message = "Login successful", user = loggedInUser });
+                var token = await _authService.LoginAsync(username, password);
+                return Ok(new { message = "Login successful", token });
             }
             catch (Exception ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(new { message = "Login failed", error = ex.Message });
             }
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var result = await _authService.LogoutAsync();
+            return Ok(new { message = result });
+        }
     }
-} 
+}
