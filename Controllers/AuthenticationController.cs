@@ -16,18 +16,11 @@ namespace healthmate_backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] User user)
         {
             try
             {
-                var user = new User
-                {
-                    Username = request.Username,
-                    Email = request.Email,
-                    Type = request.Type
-                };
-
-                var registeredUser = await _authService.RegisterAsync(user, request.Password);
+                var registeredUser = await _authService.RegisterAsync(user, user.Password);
                 return Ok(new { message = "User registered successfully", user = registeredUser });
             }
             catch (Exception ex)
@@ -37,31 +30,17 @@ namespace healthmate_backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] User user)
         {
             try
             {
-                var user = await _authService.LoginAsync(request.Username, request.Password);
-                return Ok(new { message = "Login successful", user });
+                var loggedInUser = await _authService.LoginAsync(user.Username, user.Password);
+                return Ok(new { message = "Login successful", user = loggedInUser });
             }
             catch (Exception ex)
             {
                 return Unauthorized(new { message = ex.Message });
             }
         }
-    }
-
-    public class RegisterRequest
-    {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Type { get; set; }
-    }
-
-    public class LoginRequest
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 } 
