@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\git\\healthmate-backend\\healthmate-backend.csproj": {}
+    "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\git\\healthmate-backend\\healthmate-backend.csproj": {
+    "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\git\\healthmate-backend\\healthmate-backend.csproj",
+        "projectUniqueName": "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj",
         "projectName": "healthmate-backend",
-        "projectPath": "C:\\Users\\user\\git\\healthmate-backend\\healthmate-backend.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\user\\git\\healthmate-backend\\obj\\",
+        "projectPath": "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj",
+        "packagesPath": "C:\\Users\\rawaa\\.nuget\\packages\\",
+        "outputPath": "G:\\Graduation Project\\healthmate-backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\rawaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
         ],
         "originalTargetFrameworks": [
@@ -47,10 +47,6 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "BCrypt.Net-Next": {
-              "target": "Package",
-              "version": "[4.0.3, )"
-            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[8.0.4, )"
@@ -109,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

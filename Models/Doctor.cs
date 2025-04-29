@@ -2,10 +2,10 @@
 
 public class Doctor : User
 {
-    public required string License { get; set; }
-    public required string Speciality { get; set; }
+    public string License { get; set; }
+    public string Speciality { get; set; }
     public int ExperienceYear { get; set; }
-    public required ICollection<Clinic> Clinics { get; set; }
+    public ICollection<Clinic> Clinics { get; set; }
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
     public ICollection<Reminder> CreatedReminders { get; set; } = new List<Reminder>();

@@ -4,7 +4,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using healthmate_backend.Models;
-using BCrypt.Net;
 
 namespace healthmate_backend.Services
 {
@@ -16,9 +15,10 @@ namespace healthmate_backend.Services
         public AuthenticationService(AppDbContext context, IConfiguration config)
         {
             _context = context;
-            _jwtKey = config["Jwt:Key"] ?? throw new ArgumentNullException(nameof(config), "JWT Key is not configured");
+            _jwtKey = config["Jwt:Key"];
         }
 
+        
         public async Task<User> RegisterAsync(string username, string password, string role, string email, bool acceptedTerms)
         {
             if (!acceptedTerms)
@@ -30,29 +30,30 @@ namespace healthmate_backend.Services
             if (await _context.Users.AnyAsync(u => u.Email == email))
                 throw new Exception("Email already exists.");
 
-            User user = role.ToLower() switch
+            User user;
+
+            if (role == "Doctor")
             {
-                "doctor" => new Doctor
+                user = new Doctor
                 {
                     Username = username,
-                    Email = email,
-                    Type = role,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password),
-                    License = "", // These will be set later
-                    Speciality = "",
-                    Clinics = new List<Clinic>()
-                },
-                "patient" => new Patient
+                    Email = email
+                };
+            }
+            else if (role == "Patient")
+            {
+                user = new Patient
                 {
                     Username = username,
-                    Email = email,
-                    Type = role,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password),
-                    BloodType = "", // These will be set later
-                    Location = ""
-                },
-                _ => throw new Exception("Invalid role specified")
-            };
+                    Email = email
+                };
+            }
+            else
+            {
+                throw new Exception("Invalid role.");
+            }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -60,6 +61,7 @@ namespace healthmate_backend.Services
             return user;
         }
 
+      
         public async Task<string> LoginAsync(string username, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
@@ -69,16 +71,15 @@ namespace healthmate_backend.Services
             return GenerateJwtToken(user);
         }
 
-        public async Task<string> LogoutAsync()
+        
+        public Task<string> LogoutAsync()
         {
-            // In a real application, you'd invalidate the token here
-            return "Logged out successfully";
+            return Task.FromResult("Logged out.");
         }
 
+     
         private string GenerateJwtToken(User user)
         {
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
             var key = Encoding.UTF8.GetBytes(_jwtKey);
             var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -88,7 +89,7 @@ namespace healthmate_backend.Services
                 {
                     new Claim("UserId", user.Id.ToString()),
                     new Claim("Username", user.Username),
-                    new Claim("Role", user.Type)
+                    new Claim("Role", user.GetType().Name)
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

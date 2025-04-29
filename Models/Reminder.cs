@@ -6,10 +6,10 @@ namespace healthmate_backend.Models
     {
         public int Id { get; set; }
 
-        public required string MedicationName { get; set; }     // "Panadol"
-        public required string Dosage { get; set; }             // "13" or "13mg"
-        public required string Frequency { get; set; }          // "12 hours"
-        public required string Notes { get; set; }              // Optional comments
+        public string MedicationName { get; set; }     // "Panadol"
+        public string Dosage { get; set; }             // "13" or "13mg"
+        public string Frequency { get; set; }          // "12 hours"
+        public string Notes { get; set; }              // Optional comments
 
         public bool Repeat { get; set; } = true;       // default from ERD
 
@@ -17,7 +17,7 @@ namespace healthmate_backend.Models
 
         // Receiver: Patient
         public int PatientId { get; set; }
-        public required Patient Patient { get; set; }
+        public Patient Patient { get; set; }
 
         // Creator: Optional Doctor or Patient
         public int? CreatedByDoctorId { get; set; }
