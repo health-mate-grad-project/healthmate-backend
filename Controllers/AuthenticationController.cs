@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using healthmate_backend.Services;
+using healthmate_backend.Models;
 
 namespace healthmate_backend.Controllers
 {
@@ -15,17 +16,12 @@ namespace healthmate_backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(
-            string username,
-            string password,
-            string role,
-            string email,
-            bool acceptedTerms)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                var user = await _authService.RegisterAsync(username, password, role, email, acceptedTerms);
-                return Ok(new { message = "User registered successfully", user.Id, user.Username, user.Email, Role = role });
+                var user = await _authService.RegisterAsync(request.Username, request.Password, request.Role, request.Email, request.AcceptedTerms);
+                return Ok(new { message = "User registered successfully", user.Id, user.Username, user.Email, Role = request.Role });
             }
             catch (Exception ex)
             {
@@ -34,11 +30,11 @@ namespace healthmate_backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
             {
-                var token = await _authService.LoginAsync(username, password);
+                var token = await _authService.LoginAsync(request.Username, request.Password);
                 return Ok(new { message = "Login successful", token });
             }
             catch (Exception ex)

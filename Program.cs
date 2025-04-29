@@ -25,7 +25,7 @@ builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddHttpContextAccessor();
 
 // JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"]; 
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key", "JWT Key is not configured");
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
