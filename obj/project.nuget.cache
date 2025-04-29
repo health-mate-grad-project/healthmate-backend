@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "o8YR36twLsE=",
+  "dgSpecHash": "8ksgrawODfs=",
   "success": true,
   "projectFilePath": "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\rawaa\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\rawaa\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",
     "C:\\Users\\rawaa\\.nuget\\packages\\google.protobuf\\3.30.0\\google.protobuf.3.30.0.nupkg.sha512",
     "C:\\Users\\rawaa\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

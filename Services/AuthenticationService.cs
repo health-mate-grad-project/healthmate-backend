@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using healthmate_backend.Models;
 
+using BCrypt.Net;
+
 namespace healthmate_backend.Services
 {
     public class AuthenticationService
