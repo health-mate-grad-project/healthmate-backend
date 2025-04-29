@@ -9,5 +9,6 @@ public class Doctor : User
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
     public ICollection<Reminder> CreatedReminders { get; set; } = new List<Reminder>();
-
+    public double AverageRating { get; set; } = 0.0;
+    public int TotalRatings { get; set; } = 0;
 }

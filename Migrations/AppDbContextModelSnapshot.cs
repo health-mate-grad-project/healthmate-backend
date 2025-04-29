@@ -188,6 +188,9 @@ namespace healthmate_backend.Migrations
                 {
                     b.HasBaseType("healthmate_backend.Models.User");
 
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("double");
+
                     b.Property<int>("ExperienceYear")
                         .HasColumnType("int");
 
@@ -198,6 +201,9 @@ namespace healthmate_backend.Migrations
                     b.Property<string>("Speciality")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("TotalRatings")
+                        .HasColumnType("int");
 
                     b.ToTable("Doctors", (string)null);
                 });
