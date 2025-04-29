@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\RiderProjects\\healthmate-backend\\healthmate-backend.csproj": {}
+    "D:\\healthmate-backend\\healthmate-backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\RiderProjects\\healthmate-backend\\healthmate-backend.csproj": {
+    "D:\\healthmate-backend\\healthmate-backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\RiderProjects\\healthmate-backend\\healthmate-backend.csproj",
+        "projectUniqueName": "D:\\healthmate-backend\\healthmate-backend.csproj",
         "projectName": "healthmate-backend",
-        "projectPath": "C:\\Users\\PC\\RiderProjects\\healthmate-backend\\healthmate-backend.csproj",
+        "projectPath": "D:\\healthmate-backend\\healthmate-backend.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\RiderProjects\\healthmate-backend\\obj\\",
+        "outputPath": "D:\\healthmate-backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config"
