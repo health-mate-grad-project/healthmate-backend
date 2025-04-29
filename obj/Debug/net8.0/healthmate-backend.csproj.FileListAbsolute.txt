@@ -187,3 +187,12 @@ G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\refint\healthmate-back
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.pdb
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\healthmate-backend.genruntimeconfig.cache
 G:\Graduation Project\healthmate-backend\obj\Debug\net8.0\ref\healthmate-backend.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

@@ -65,14 +65,15 @@ namespace healthmate_backend.Services
         }
 
 
-        public async Task<string> LoginAsync(string username, string password)
+        public async Task<string> LoginAsync(string email, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
-                throw new Exception("Invalid username or password");
+                throw new Exception("Invalid email or password");
 
             return GenerateJwtToken(user);
         }
+
 
         public async Task<string> LogoutAsync()
 
@@ -94,7 +95,7 @@ namespace healthmate_backend.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("UserId", user.Id.ToString()),
-                    new Claim("Username", user.Username),
+                    new Claim("Email", user.Email),
                     new Claim("Role", user.Type)
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
