@@ -37,7 +37,11 @@ namespace healthmate_backend.Services
                 user = new Doctor
                 {
                     Username = username,
-                    Email = email
+                    Email = email,
+                    Type="Doctor",
+                    License = "Pending",        
+                    Speciality = "General",       
+                    ExperienceYear = 0  
                 };
             }
             else if (role == "Patient")
@@ -45,7 +49,13 @@ namespace healthmate_backend.Services
                 user = new Patient
                 {
                     Username = username,
-                    Email = email
+                    Email = email,
+                    Type="Patient",
+                    Height = 0,
+                    Weight = 0,
+                    BloodType = "Unknown",
+                    Birthdate = DateTime.UtcNow.AddYears(-20)
+
                 };
             }
             else
@@ -55,8 +65,16 @@ namespace healthmate_backend.Services
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(password);
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database Error: " + ex.InnerException?.Message ?? ex.Message);
+            }
+
 
             return user;
         }
