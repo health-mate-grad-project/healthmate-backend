@@ -51,6 +51,25 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Doctor profile updated successfully" });
         }
+[Authorize(Roles = "Doctor")]
+[HttpPost("search-patients")]
+public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] PatientSearchRequest request)
+{
+     var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (doctorIdClaim == null)
+        return Unauthorized("Doctor ID not found in token");
+
+    var doctorId = int.Parse(doctorIdClaim.Value);
+    var patientName = request.PatientName;
+
+    var patients = await _doctorService.GetPatientsByDoctorAndNameAsync(doctorId, patientName);
+
+    if (patients == null || !patients.Any())
+        return NotFound("No matching patients found for this doctor.");
+
+    return Ok(patients);
+}
+
         
     }
 }
