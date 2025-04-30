@@ -69,7 +69,6 @@ namespace healthmate_backend.Services
                 patient.Height = request.Height.Value;
                 Console.WriteLine($"Updated Height: {request.Height.Value}");
             }
-
             // Save changes to the database
             await _context.SaveChangesAsync();
             return true;
