@@ -165,7 +165,9 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             var userDTO = new UserDTO
             {
                 Username = user.Username,  // Get the Username from the Users table
-                Password = user.Password   // Get the Password (note: this is usually hashed in a real-world scenario)
+                Password = user.Password,   // Get the Password (note: this is usually hashed in a real-world scenario)
+                Type = user.Type   // Get type
+
             };
 
             return Ok(userDTO);
