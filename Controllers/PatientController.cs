@@ -34,5 +34,24 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Patient profile completed successfully" });
         }
+        
+        [Authorize(Roles = "patient")]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var success = await _patientService.UpdateProfileAsync(userId, request);
+            if (!success)
+                return NotFound(new { message = "Patient not found" });
+
+            return Ok(new { message = "Patient profile updated successfully" });
+        }
+        
     }
 }

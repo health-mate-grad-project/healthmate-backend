@@ -25,5 +25,57 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        
+        public async Task<bool> UpdateProfileAsync(int id, UpdateProfileRequest request)
+        {
+            // Fetch the user and patient entities from the database
+            var user = await _context.Users.FindAsync(id); // Users table update
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id); // Patients table update
+
+            if (user == null || patient == null)
+            {
+                // If no user or patient is found, return false
+                Console.WriteLine("User or patient not found.");
+                return false;
+            }
+
+            // Update user information (e.g., name, email) in the Users table
+            if (!string.IsNullOrEmpty(request.Name)) 
+            {
+                user.Username = request.Name;
+                Console.WriteLine($"Updated Name: {request.Name}");
+            }
+
+            if (!string.IsNullOrEmpty(request.Email)) 
+            {
+                user.Email = request.Email;
+                Console.WriteLine($"Updated Email: {request.Email}");
+            }
+
+            // Update patient-specific information (e.g., height, weight, DOB) in the Patients table
+            if (request.DateOfBirth.HasValue)
+            {
+                patient.Birthdate = request.DateOfBirth.Value;
+                Console.WriteLine($"Updated DOB: {request.DateOfBirth.Value}");
+            }
+
+            if (request.Weight.HasValue)
+            {
+                patient.Weight = request.Weight.Value;
+                Console.WriteLine($"Updated Weight: {request.Weight.Value}");
+            }
+            if (request.Height.HasValue)
+            {
+                patient.Height = request.Height.Value;
+                Console.WriteLine($"Updated Height: {request.Height.Value}");
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+
     }
+    
 }
