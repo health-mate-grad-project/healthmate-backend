@@ -96,7 +96,7 @@ namespace healthmate_backend.Services
                 {
                     new Claim("UserId", user.Id.ToString()),
                     new Claim("Email", user.Email),
-                    new Claim("Role", user.Type)
+                    new Claim("Role", user.Type.ToLower())
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
