@@ -53,5 +53,23 @@ namespace healthmate_backend.Services
 
             return true;
         }
+        
+        public async Task<bool> UpdateProfileAsync(int id, UpdateDoctorProfileRequest request)
+        {
+            var doctor = await _context.Doctors.FindAsync(id);
+            if (doctor == null) return false;
+
+            // Update the fields if they are provided
+            if (!string.IsNullOrEmpty(request.Name)) doctor.Username = request.Name;
+            if (!string.IsNullOrEmpty(request.Email)) doctor.Email = request.Email;
+            if (!string.IsNullOrEmpty(request.Specialization)) doctor.Speciality = request.Specialization;
+            if (!string.IsNullOrEmpty(request.License)) doctor.License = request.License;
+            if (request.ExperienceYear.HasValue) doctor.ExperienceYear = request.ExperienceYear.Value;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        
     }
 }
