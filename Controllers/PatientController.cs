@@ -95,5 +95,83 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             return Ok(new { message = "Patient profile updated successfully" });
         }
         
+        
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetPatientProfile()
+        {
+            // Assuming the patient is identified by the logged-in user's JWT token (e.g., via Claims)
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+            }
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+            }
+
+            var patient = await _context.Patients
+                .Where(p => p.Id == userId)
+                .FirstOrDefaultAsync();
+
+            if (patient == null)
+            {
+                return NotFound(new { message = "Patient not found" });
+            }
+
+            // Map the patient model to PatientDTO
+            var patientDTO = new PatientDTO
+            {
+                Id = patient.Id,
+                Name = patient.Username, // Assuming 'Username' is the name field
+                Email = patient.Email,
+                DateOfBirth = patient.Birthdate,
+                BloodType = patient.BloodType,
+                Height = patient.Height,
+                Weight = patient.Weight,
+                Location = patient.Location
+            };
+
+            return Ok(patientDTO);
+        }
+        
+        [HttpGet("user-profile")]
+        public async Task<IActionResult> GetPUserProfile()
+        {
+            // Assuming the patient is identified by the logged-in user's JWT token (e.g., via Claims)
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+            }
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+            }
+
+            // Fetch user from the Users table using the userId
+            var user = await _context.Users
+                .Where(u => u.Id == userId)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            // Map the user model to UserDTO
+            var userDTO = new UserDTO
+            {
+                Username = user.Username,  // Get the Username from the Users table
+                Password = user.Password,   // Get the Password (note: this is usually hashed in a real-world scenario)
+                Type = user.Type   // Get type
+
+            };
+
+            return Ok(userDTO);
+        }
+
     }
 }
