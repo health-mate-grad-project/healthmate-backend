@@ -25,5 +25,12 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
+		public async Task<List<Doctor>> SearchDoctorsAsync(string query)
+		{	
+    		return await _context.Doctors
+        		.Where(d => d.Username.Contains(query) || d.Speciality.Contains(query))
+        		.ToListAsync();
+		}
+
     }
 }

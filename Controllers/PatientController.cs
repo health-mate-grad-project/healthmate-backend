@@ -1,20 +1,23 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using healthmate_backend.Services;
 using healthmate_backend.Models;
+using healthmate_backend.Models.Request;
 
 namespace healthmate_backend.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController : ControllerBase
     {
+        private readonly AppDbContext _context;
         private readonly PatientService _patientService;
 
-        public PatientController(PatientService patientService)
+        public PatientController(PatientService patientService, AppDbContext context)
         {
             _patientService = patientService;
+            _context = context;
         }
 
         [Authorize(Roles = "patient")]
@@ -34,5 +37,44 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Patient profile completed successfully" });
         }
+
+        // Search doctors based on doctor name or specialty (not both required)
+        [Authorize(Roles = "patient")]
+[HttpPost("search-doctors")]
+public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest request)
+{
+    // Check if at least one field is provided
+    if (string.IsNullOrEmpty(request.DoctorName) && string.IsNullOrEmpty(request.Speciality))
+        return BadRequest(new { message = "Please provide either a doctor's name or a speciality." });
+
+    // Perform search based on provided fields
+    var doctorsQuery = _context.Doctors
+        .Join(
+            _context.Users, 
+            doctor => doctor.Id, // Assuming Doctor has a UserId referring to Users table
+            user => user.Id,
+            (doctor, user) => new { Doctor = doctor, User = user }
+        )
+        .Where(d =>
+            (request.DoctorName != null && d.User.Username.Contains(request.DoctorName)) || // Search by name
+            (request.Speciality != null && d.Doctor.Speciality.Contains(request.Speciality))) // Search by speciality
+        .Select(d => new DoctorSearchResponse
+        {
+            DoctorName = d.User.Username, // Doctor's name comes from the Users table
+            Speciality = d.Doctor.Speciality,
+            AverageRating = d.Doctor.AverageRating,
+            TotalRatings = d.Doctor.TotalRatings,
+            // Calculate the number of filled stars (max 5 stars)
+            FilledStars = (int)Math.Round(d.Doctor.AverageRating)
+        });
+
+    var doctors = await doctorsQuery.ToListAsync();
+
+    if (doctors.Count == 0)
+        return NotFound(new { message = "No doctors found" });
+
+    return Ok(doctors);
+}
+
     }
 }
