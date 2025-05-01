@@ -15,7 +15,7 @@ namespace healthmate_backend.Controllers
             _doctorHomeScreenService = doctorHomeScreenService;
         }
 
-        [Authorize(Roles = "doctor")]
+        [Authorize(Roles = "Doctor")]
         [HttpGet("upcoming-appointments")]
         public async Task<IActionResult> GetUpcomingAppointments()
         {
