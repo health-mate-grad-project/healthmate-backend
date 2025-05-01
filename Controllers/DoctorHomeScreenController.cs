@@ -48,5 +48,23 @@ namespace healthmate_backend.Controllers
 
             return Ok(patientDetails);
         }
+
+        [Authorize(Roles = "Doctor")]
+        [HttpPut("cancel-appointment/{appointmentId}")]
+        public async Task<IActionResult> CancelAppointment(int appointmentId)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var doctorId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var result = await _doctorHomeScreenService.CancelAppointmentAsync(appointmentId, doctorId);
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = "Appointment cancelled successfully" });
+        }
     }
 }
