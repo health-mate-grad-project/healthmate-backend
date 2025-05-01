@@ -75,5 +75,31 @@ namespace healthmate_backend.Services
                 }
             };
         }
+
+        public async Task<AppointmentActionResult> CancelAppointmentAsync(int appointmentId, int doctorId)
+        {
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.DoctorId == doctorId);
+
+            if (appointment == null)
+                return new AppointmentActionResult { Success = false, Message = "Appointment not found or unauthorized access" };
+
+            if (appointment.Status == "Cancelled")
+                return new AppointmentActionResult { Success = false, Message = "Appointment is already cancelled" };
+
+            if (appointment.Date.Date < DateTime.UtcNow.Date)
+                return new AppointmentActionResult { Success = false, Message = "Cannot cancel past appointments" };
+
+            appointment.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+
+            return new AppointmentActionResult { Success = true, Message = "Appointment cancelled successfully" };
+        }
+    }
+
+    public class AppointmentActionResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
     }
 }
