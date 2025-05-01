@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace healthmate_backend.DTOs
+namespace healthmate_backend.Models.DTOs
 {
     public class AppointmentDTO
     {
@@ -13,9 +13,6 @@ namespace healthmate_backend.DTOs
         
         // Include only necessary patient information
         public PatientBasicDTO Patient { get; set; }
-        public int AppointmentId { get; set; }
-        public string DoctorName { get; set; }
-        public string PatientName { get; set; }
     }
 
     public class PatientBasicDTO

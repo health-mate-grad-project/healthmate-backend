@@ -1,4 +1,5 @@
-﻿using healthmate_backend.Models;
+﻿using healthmate_backend.DTOs;
+using healthmate_backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace healthmate_backend.Services
