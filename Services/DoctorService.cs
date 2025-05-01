@@ -69,7 +69,36 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
-        
+        public async Task<List<PatientSearchResponse>> GetPatientsByDoctorAndNameAsync(int doctorId, string patientName)
+{
+    return await _context.Appointments
+        .Include(a => a.Patient)
+        .Where(a => a.DoctorId == doctorId &&
+                    a.Patient.Username.Contains(patientName)) // or use .ToLower().Contains() for case-insensitive
+        .Select(a => new PatientSearchResponse
+        {
+            PatientName = a.Patient.Username,
+            Status = a.Status,
+            Date = a.Date,
+            Time = a.Time
+        }) // Remove duplicate patients who had multiple appointments
+        .ToListAsync();
+}
+public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
+        {
+            var doctor = await _context.Doctors
+                .Where(d => d.Id == doctorId)
+                .Select(d => new DoctorDto
+                {
+                    Username = d.Username, // Only using name
+                    Speciality = d.Speciality // Only using speciality
+                    // You can add more properties as needed (ExperienceYear, AverageRating, etc.)
+                })
+                .FirstOrDefaultAsync();
+
+            return doctor;
+        }
+
         
     }
 }
