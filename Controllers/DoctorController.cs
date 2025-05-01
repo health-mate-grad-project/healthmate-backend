@@ -69,6 +69,24 @@ public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] Patie
 
     return Ok(patients);
 }
+[Authorize(Roles = "Doctor")]
+        [HttpGet("doctor-details")]
+        public async Task<IActionResult> GetDoctorDetails()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            // Fetch doctor details (using full DoctorDto but using only the necessary fields)
+            var doctorDetails = await _doctorService.GetDoctorDetailsByIdAsync(userId);
+            if (doctorDetails == null)
+                return NotFound(new { message = "Doctor not found" });
+
+            return Ok(doctorDetails); // Return the full doctor details DTO (with all properties available)
+        }
 
         
     }

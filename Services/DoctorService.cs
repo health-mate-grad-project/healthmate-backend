@@ -84,6 +84,20 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
+public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
+        {
+            var doctor = await _context.Doctors
+                .Where(d => d.Id == doctorId)
+                .Select(d => new DoctorDto
+                {
+                    Username = d.Username, // Only using name
+                    Speciality = d.Speciality // Only using speciality
+                    // You can add more properties as needed (ExperienceYear, AverageRating, etc.)
+                })
+                .FirstOrDefaultAsync();
+
+            return doctor;
+        }
 
         
     }
