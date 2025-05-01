@@ -44,5 +44,36 @@ namespace healthmate_backend.Services
 
             return appointments;
         }
+
+        public async Task<PatientDetailsDTO> GetAppointmentPatientDetailsAsync(int appointmentId, int doctorId)
+        {
+            var appointment = await _context.Appointments
+                .Include(a => a.Patient)
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.DoctorId == doctorId);
+
+            if (appointment == null)
+                return null;
+
+            return new PatientDetailsDTO
+            {
+                Id = appointment.Patient.Id,
+                Name = appointment.Patient.Username,
+                Email = appointment.Patient.Email,
+                DateOfBirth = appointment.Patient.Birthdate,
+                BloodType = appointment.Patient.BloodType,
+                Height = appointment.Patient.Height,
+                Weight = appointment.Patient.Weight,
+                Location = appointment.Patient.Location,
+                AppointmentDetails = new AppointmentDetailsDTO
+                {
+                    Id = appointment.Id,
+                    AppointmentType = appointment.AppointmentType,
+                    Date = appointment.Date,
+                    Time = appointment.Time,
+                    Status = appointment.Status,
+                    Content = appointment.Content
+                }
+            };
+        }
     }
 }
