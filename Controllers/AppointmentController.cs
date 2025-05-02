@@ -15,6 +15,44 @@ namespace healthmate_backend.Controllers
             _appointmentService = appointmentService;
         }
 
+        [Authorize(Roles = "Doctor")]
+        [HttpPost("accept-appointment/{appointmentId}")]
+        public async Task<IActionResult> AcceptAppointment(int appointmentId)
+        {
+            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (doctorIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(doctorIdClaim.Value, out var doctorId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var success = await _appointmentService.AcceptAppointmentAsync(appointmentId, doctorId);
+
+            if (!success)
+                return BadRequest(new { message = "Appointment must be in Pending status to accept" });
+
+            return Ok(new { message = "Appointment accepted successfully" });
+        }
+
+        [Authorize(Roles = "Doctor")]
+        [HttpPost("reject-appointment/{appointmentId}")]
+        public async Task<IActionResult> RejectAppointment(int appointmentId)
+        {
+            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (doctorIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(doctorIdClaim.Value, out var doctorId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var success = await _appointmentService.RejectAppointmentAsync(appointmentId, doctorId);
+
+            if (!success)
+                return BadRequest(new { message = "Appointment must be in Pending status to reject" });
+
+            return Ok(new { message = "Appointment rejected successfully" });
+        }
+
         [Authorize]
         [HttpGet("appointments")]
         public async Task<IActionResult> GetAppointments()

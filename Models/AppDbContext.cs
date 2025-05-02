@@ -6,6 +6,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<Patient> Patients { get; set; }
+	public DbSet<AvailableSlot> AvailableSlots { get; set; }
 
     public DbSet<Clinic> Clinics { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
@@ -52,7 +53,11 @@ public class AppDbContext : DbContext
             .HasOne(a => a.Doctor)
             .WithMany(d => d.Appointments)
             .HasForeignKey(a => a.DoctorId);
-
+modelBuilder.Entity<AvailableSlot>()
+    .HasOne(s => s.Doctor)
+    .WithMany(d => d.AvailableSlots)
+    .HasForeignKey(s => s.DoctorId)
+    .OnDelete(DeleteBehavior.Cascade);
 
         base.OnModelCreating(modelBuilder);
     }

@@ -15,6 +15,25 @@ namespace healthmate_backend.Controllers
         {
             _doctorService = doctorService;
         }
+[Authorize(Roles = "Doctor")]
+[HttpGet("pending-appointments")]
+public async Task<IActionResult> GetPendingAppointments()
+{
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (userIdClaim == null)
+        return Unauthorized(new { message = "Invalid token: no UserId" });
+
+    if (!int.TryParse(userIdClaim.Value, out var userId))
+        return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+    var pendingAppointments = await _doctorService.GetPendingAppointmentsAsync(userId);
+
+    if (pendingAppointments == null || !pendingAppointments.Any())
+        return NotFound(new { message = "No pending appointments found." });
+
+    return Ok(pendingAppointments);  // Return the list of simplified AppointmentDTOs
+}
+
 
         [Authorize(Roles = "Doctor")]
         [HttpPut("complete-profile")]

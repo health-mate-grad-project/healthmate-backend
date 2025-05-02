@@ -11,4 +11,6 @@ public class Doctor : User
     public ICollection<Reminder> CreatedReminders { get; set; } = new List<Reminder>();
     public double AverageRating { get; set; } = 0.0;
     public int TotalRatings { get; set; } = 0;
+	public ICollection<AvailableSlot> AvailableSlots { get; set; } = new List<AvailableSlot>();
+
 }

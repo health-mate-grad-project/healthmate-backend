@@ -1,7 +1,7 @@
 ﻿using healthmate_backend.Models;
 using healthmate_backend.Models.Request;
 using Microsoft.EntityFrameworkCore;
-
+using healthmate_backend.Models.DTOs;  
 namespace healthmate_backend.Services
 {
     public class DoctorService
@@ -98,6 +98,32 @@ public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
 
             return doctor;
         }
+public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
+{
+    var pendingAppointments = await _context.Appointments
+        .Include(a => a.Patient)  // Include patient details
+        .Where(a => a.DoctorId == doctorId && a.Status == "Pending")
+        .Select(a => new AppointmentDTO
+        {
+            Id = a.Id,
+            
+            Date = a.Date,
+           
+            Time = a.Time,
+            
+            Patient = new PatientBasicDTO  // Include patient information in DTO
+            {
+                Id = a.Patient.Id,
+                Username = a.Patient.Username,
+                
+            }
+        })
+        .ToListAsync();
+
+    return pendingAppointments;
+}
+
+
 
         
     }
