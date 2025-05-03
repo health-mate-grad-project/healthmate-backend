@@ -69,8 +69,8 @@ namespace healthmate_backend.Services
             {
                 appointments = await _context.Appointments
                     .Where(a => a.PatientId == userId)
-                    .Include(a => a.Doctor)
-                    .Include(a => a.Patient)
+                    .Include(a => a.Doctor) // Include Doctor details
+                    .Include(a => a.Patient) // Include Patient details
                     .Select(a => new AppointmentDTO
                     {
                         AppointmentId = a.Id,
@@ -80,7 +80,10 @@ namespace healthmate_backend.Services
                         Time = a.Time,
                         Content = a.Content,
                         DoctorName = a.Doctor.Username,
-                        PatientName = a.Patient.Username
+                        PatientName = a.Patient.Username,
+                        DoctorId = a.DoctorId,
+                        PatientId = a.PatientId,
+                        Speciality = a.Doctor.Speciality // Include Doctor's speciality
                     })
                     .ToListAsync();
             }
@@ -88,8 +91,8 @@ namespace healthmate_backend.Services
             {
                 appointments = await _context.Appointments
                     .Where(a => a.DoctorId == userId)
-                    .Include(a => a.Doctor)
-                    .Include(a => a.Patient)
+                    .Include(a => a.Doctor) // Include Doctor details
+                    .Include(a => a.Patient) // Include Patient details
                     .Select(a => new AppointmentDTO
                     {
                         AppointmentId = a.Id,
@@ -99,7 +102,10 @@ namespace healthmate_backend.Services
                         Time = a.Time,
                         Content = a.Content,
                         DoctorName = a.Doctor.Username,
-                        PatientName = a.Patient.Username
+                        PatientName = a.Patient.Username,
+                        DoctorId = a.DoctorId,
+                        PatientId = a.PatientId,
+                        Speciality = a.Doctor.Speciality // Include Doctor's speciality
                     })
                     .ToListAsync();
             }
