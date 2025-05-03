@@ -10,6 +10,8 @@
         public int ExperienceYear { get; set; }
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
+    	public string Location { get; set; }
+
     }
 
 }

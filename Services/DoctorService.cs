@@ -84,47 +84,57 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
-        
         public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
         {
             var doctor = await _context.Doctors
-                .Where(d => d.Id == doctorId)
-                .Select(d => new DoctorDto
-                {
-                    Username = d.Username, // Only using name
-                    Speciality = d.Speciality // Only using speciality
-                    // You can add more properties as needed (ExperienceYear, AverageRating, etc.)
-                })
-                .FirstOrDefaultAsync();
+                .Include(d => d.Clinics)
+                .FirstOrDefaultAsync(d => d.Id == doctorId);
 
-            return doctor;
+            if (doctor == null)
+                return null;
+
+            // Get the first clinic's location if available
+            var location = doctor.Clinics.FirstOrDefault()?.Location ?? "No location available";
+
+            return new DoctorDto
+            {
+                Id = doctor.Id,
+                Username = doctor.Username,
+                Email = doctor.Email,
+                License = doctor.License,
+                Speciality = doctor.Speciality,
+                ExperienceYear = doctor.ExperienceYear,
+                AverageRating = doctor.AverageRating,
+                TotalRatings = doctor.TotalRatings,
+                Location = location  // Assign location from the clinic
+            };
         }
 
         public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
-{
-    var pendingAppointments = await _context.Appointments
-        .Include(a => a.Patient)  // Include patient details
-        .Where(a => a.DoctorId == doctorId && a.Status == "Pending")
-        .Select(a => new AppointmentDTO
         {
-            Id = a.Id,
-            
-            Date = a.Date,
-           
-            Time = a.Time,
-            
-            Patient = new PatientBasicDTO  // Include patient information in DTO
-            {
-                Id = a.Patient.Id,
-                Username = a.Patient.Username,
-                
-            }
-        })
-        .ToListAsync();
+            var pendingAppointments = await _context.Appointments
+                .Include(a => a.Patient)  // Include patient details
+                .Where(a => a.DoctorId == doctorId && a.Status == "Pending")
+                .Select(a => new AppointmentDTO
+                {
+                    Id = a.Id,
+                    
+                    Date = a.Date,
+                   
+                    Time = a.Time,
+                    
+                    Patient = new PatientBasicDTO  // Include patient information in DTO
+                    {
+                        Id = a.Patient.Id,
+                        Username = a.Patient.Username,
+                        
+                    }
+                })
+                .ToListAsync();
 
-    return pendingAppointments;
-}
-
+            return pendingAppointments;
+        }
+        
         public async Task<bool> SaveAvailableSlotsAsync(int doctorId, List<SlotData> slots)
         {
             var doctor = await _context.Doctors.FindAsync(doctorId);
@@ -137,7 +147,7 @@ namespace healthmate_backend.Services
                 {
                     Date = slot.Date,
                     StartTime = slot.StartTime,
-                  //  EndTime = slot.EndTime,
+                    //  EndTime = slot.EndTime,
                     DoctorId = doctorId,
                     Doctor = doctor, // Initialize the Doctor property
                     DayOfWeek = slot.Date.ToString("ddd")  // Converts Date to DayOfWeek ('Mon', 'Tue', etc.)
@@ -157,8 +167,7 @@ namespace healthmate_backend.Services
         }
 
 
-    
-
+        
         
     }
 }
