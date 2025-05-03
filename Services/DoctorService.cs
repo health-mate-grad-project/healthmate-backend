@@ -84,7 +84,8 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
-public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
+        
+        public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
         {
             var doctor = await _context.Doctors
                 .Where(d => d.Id == doctorId)
@@ -98,7 +99,8 @@ public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
 
             return doctor;
         }
-public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
+
+        public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
 {
     var pendingAppointments = await _context.Appointments
         .Include(a => a.Patient)  // Include patient details
@@ -123,7 +125,39 @@ public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId
     return pendingAppointments;
 }
 
+        public async Task<bool> SaveAvailableSlotsAsync(int doctorId, List<SlotData> slots)
+        {
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            if (doctor == null)
+                return false;
 
+            foreach (var slot in slots)
+            {
+                var availableSlot = new AvailableSlot
+                {
+                    Date = slot.Date,
+                    StartTime = slot.StartTime,
+                  //  EndTime = slot.EndTime,
+                    DoctorId = doctorId,
+                    Doctor = doctor, // Initialize the Doctor property
+                    DayOfWeek = slot.Date.ToString("ddd")  // Converts Date to DayOfWeek ('Mon', 'Tue', etc.)
+
+                };
+
+                _context.AvailableSlots.Add(availableSlot);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        public async Task<Doctor> GetDoctorByIdAsync(int doctorId)
+        {
+            return await _context.Doctors.FindAsync(doctorId);
+        }
+
+
+    
 
         
     }

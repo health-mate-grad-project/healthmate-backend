@@ -107,6 +107,27 @@ public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] Patie
             return Ok(doctorDetails); // Return the full doctor details DTO (with all properties available)
         }
 
-        
+        [Authorize(Roles = "Doctor")]
+        [HttpPost("save-available-slots")]
+        public async Task<IActionResult> SaveAvailableSlots([FromBody] SaveAvailableSlotsRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var doctor = await _doctorService.GetDoctorByIdAsync(userId);
+            if (doctor == null)
+                return NotFound(new { message = "Doctor not found" });
+
+            var success = await _doctorService.SaveAvailableSlotsAsync(doctor.Id, request.Slots);
+            if (!success)
+                return BadRequest(new { message = "Failed to save available slots" });
+
+            return Ok(new { message = "Available slots saved successfully" });
+        }
+
     }
 }
