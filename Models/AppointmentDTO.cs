@@ -16,6 +16,13 @@ namespace healthmate_backend.DTOs
         public int AppointmentId { get; set; }
         public string DoctorName { get; set; }
         public string PatientName { get; set; }
+        
+        // Add DoctorId and PatientId
+        public int DoctorId { get; set; }
+        public int PatientId { get; set; }
+        // Add Doctor's speciality
+        public string Speciality { get; set; }
+        
     }
 
     public class PatientBasicDTO
