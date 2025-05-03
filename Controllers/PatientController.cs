@@ -13,11 +13,13 @@ namespace healthmate_backend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly PatientService _patientService;
+        private readonly DoctorService _doctorService;
 
-        public PatientController(PatientService patientService, AppDbContext context)
+        public PatientController(PatientService patientService, AppDbContext context,DoctorService doctorService)
         {
             _patientService = patientService;
             _context = context;
+            _doctorService = doctorService;
         }
 
         [Authorize(Roles = "patient")]
@@ -172,6 +174,18 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
 
             return Ok(userDTO);
         }
+        [Authorize(Roles = "patient")]
+        [HttpGet("doctor-details/{doctorId}")]
+        public async Task<IActionResult> GetDoctorDetails(int doctorId)
+        {
+            // Fetch doctor details by doctorId
+            var doctorDetails = await _doctorService.GetDoctorDetailsByIdAsync(doctorId);
+            if (doctorDetails == null)
+                return NotFound(new { message = "Doctor not found" });
+
+            return Ok(doctorDetails);
+        }
+
 
     }
 }

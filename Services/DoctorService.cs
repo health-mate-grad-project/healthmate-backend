@@ -85,19 +85,31 @@ namespace healthmate_backend.Services
         .ToListAsync();
 }
 public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
-        {
-            var doctor = await _context.Doctors
-                .Where(d => d.Id == doctorId)
-                .Select(d => new DoctorDto
-                {
-                    Username = d.Username, // Only using name
-                    Speciality = d.Speciality // Only using speciality
-                    // You can add more properties as needed (ExperienceYear, AverageRating, etc.)
-                })
-                .FirstOrDefaultAsync();
+{
+    var doctor = await _context.Doctors
+        .Include(d => d.Clinics)
+        .FirstOrDefaultAsync(d => d.Id == doctorId);
 
-            return doctor;
-        }
+    if (doctor == null)
+        return null;
+
+    // Get the first clinic's location if available
+    var location = doctor.Clinics.FirstOrDefault()?.Location ?? "No location available";
+
+    return new DoctorDto
+    {
+        Id = doctor.Id,
+        Username = doctor.Username,
+        Email = doctor.Email,
+        License = doctor.License,
+        Speciality = doctor.Speciality,
+        ExperienceYear = doctor.ExperienceYear,
+        AverageRating = doctor.AverageRating,
+        TotalRatings = doctor.TotalRatings,
+        Location = location  // Assign location from the clinic
+    };
+}
+
 public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
 {
     var pendingAppointments = await _context.Appointments
