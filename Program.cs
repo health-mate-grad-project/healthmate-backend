@@ -1,9 +1,8 @@
-using healthmate_backend.Models;
 using healthmate_backend.Services;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
