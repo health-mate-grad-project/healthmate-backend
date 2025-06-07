@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using healthmate_backend.Models;
+using healthmate_backend.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using healthmate_backend.Services;
 using healthmate_backend.Models.Request;
@@ -129,5 +131,91 @@ public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] Patie
             return Ok(new { message = "Available slots saved successfully" });
         }
 
+        [Authorize(Roles = "Doctor")]
+        [HttpGet("get-available-slots")]
+        public async Task<IActionResult> GetAvailableSlots()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var doctor = await _doctorService.GetDoctorByIdAsync(userId);
+            if (doctor == null)
+                return NotFound(new { message = "Doctor not found" });
+
+            var availableSlots = await _doctorService.GetAvailableSlotsAsync(doctor.Id);
+            if (availableSlots == null || !availableSlots.Any())
+                return NotFound(new { message = "No available slots found" });
+
+            var availableSlotDtos = availableSlots.Select(slot => new AvailableSlotDto
+            {
+                Id = slot.Id,
+                Date = slot.Date,
+                StartTime = slot.StartTime,
+                IsBooked = slot.IsBooked,
+                DayOfWeek = slot.DayOfWeek,
+                DoctorId = slot.DoctorId,
+                Doctor = new DoctorDto // Map the DoctorId to DoctorDto if needed
+                {
+                    Id = doctor.Id,
+                    Username = doctor.Username,
+                    Email = doctor.Email,
+                    Speciality = doctor.Speciality
+                }
+            }).ToList();
+
+            return Ok(availableSlotDtos);
+        }
+
+        
+        [Authorize(Roles = "Doctor")]
+        [HttpGet("get-all-slots")]
+        public async Task<IActionResult> GetAllDoctorSlots()
+        {
+            // Get the UserId from the claims
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            // Fetch the doctor by userId
+            var doctor = await _doctorService.GetDoctorByIdAsync(userId);
+            if (doctor == null)
+                return NotFound(new { message = "Doctor not found" });
+
+            // Fetch available slots for the doctor
+            var availableSlots = await _doctorService.GetAllDoctorSlotsAsync(doctor.Id);
+            if (availableSlots == null || !availableSlots.Any())
+                return NotFound(new { message = "No available slots found" });
+
+            // Map available slots to DTOs
+            var availableSlotDtos = availableSlots.Select(slot => new AvailableSlotDto
+            {
+                Id = slot.Id,
+                Date = slot.Date,
+                StartTime = slot.StartTime,
+                IsBooked = slot.IsBooked,
+                DayOfWeek = slot.DayOfWeek,
+                DoctorId = slot.DoctorId,
+                Doctor = new DoctorDto 
+                {
+                    Id = doctor.Id,
+                    Username = doctor.Username,
+                    Email = doctor.Email,
+                    Speciality = doctor.Speciality,
+                    License = doctor.License,
+                }
+            }).ToList();
+
+            return Ok(availableSlotDtos);
+        }
+
+        
+        
     }
 }
