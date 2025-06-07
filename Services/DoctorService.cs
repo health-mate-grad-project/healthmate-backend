@@ -166,8 +166,19 @@ namespace healthmate_backend.Services
             return await _context.Doctors.FindAsync(doctorId);
         }
 
+        public async Task<List<AvailableSlot>> GetAvailableSlotsAsync(int doctorId)
+        {
+            return await _context.AvailableSlots
+                .Where(slot => slot.DoctorId == doctorId && !slot.IsBooked)  
+                .ToListAsync();
+        }
 
-        
+        public async Task<List<AvailableSlot>> GetAllDoctorSlotsAsync(int doctorId)
+        {
+            return await _context.AvailableSlots
+                .Where(slot => slot.DoctorId == doctorId )  
+                .ToListAsync();
+        }
         
     }
 }
