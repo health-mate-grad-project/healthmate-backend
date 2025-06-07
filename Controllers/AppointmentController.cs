@@ -81,5 +81,24 @@ namespace healthmate_backend.Controllers
 
             return Ok(appointments);
         }
+
+        [Authorize(Roles = "patient")]
+        [HttpPost("cancel-appointment/{appointmentId}")]
+        public async Task<IActionResult> CancelAppointment(int appointmentId)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var patientId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var success = await _appointmentService.CancelAppointmentAsync(appointmentId, patientId);
+
+            if (!success)
+                return BadRequest(new { message = "Appointment must be in Pending or Scheduled status to cancel" });
+
+            return Ok(new { message = "Appointment cancelled successfully" });
+        }
     }
 }
