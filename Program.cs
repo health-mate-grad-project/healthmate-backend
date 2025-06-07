@@ -6,7 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutterWeb", policy =>
+    {
+        policy.WithOrigins("http://localhost:51096") // Flutter web port
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 // Your MySQL connection string
 var connectionString = "server=mysql-2dbc541a-healthmate.k.aivencloud.com;port=15855;database=defaultdb;user=avnadmin;password=AVNS_lhFXyGW3wGvurVtSCVi;SslMode=Required;";
 
@@ -56,7 +64,7 @@ builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<DoctorHomeScreenService>();
 
 var app = builder.Build();
-
+app.UseCors("AllowFlutterWeb");
 // Middleware
 app.UseHttpsRedirection();
 app.UseAuthentication();  // 🔥 Add before Authorization
