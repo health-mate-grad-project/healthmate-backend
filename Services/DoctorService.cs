@@ -179,6 +179,31 @@ namespace healthmate_backend.Services
                 .Where(slot => slot.DoctorId == doctorId )  
                 .ToListAsync();
         }
+public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doctorId)
+{
+    var patient = await _context.Patients.FindAsync(request.PatientId);
+    if (patient == null)
+        return false;
+
+    var reminder = new Reminder
+    {
+        MedicationName     = request.MedicationName,
+        Dosage             = request.Dosage,
+        Frequency          = request.Frequency,
+        Notes              = request.Notes,
+        Repeat             = request.Repeat,
+        CreatedAt          = DateTime.UtcNow,
+        PatientId          = request.PatientId,
+        Patient            = patient,
+        CreatedByDoctorId  = doctorId,
+		DoctorId			=doctorId
+    };
+
+    _context.Reminders.Add(reminder);
+    await _context.SaveChangesAsync();
+    return true;
+}
+
         
     }
 }

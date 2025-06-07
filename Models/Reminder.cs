@@ -25,5 +25,7 @@ namespace healthmate_backend.Models
 
         public int? CreatedByPatientId { get; set; }
         public Patient? CreatedByPatient { get; set; }
+public int DoctorId { get; set; }
+        public Doctor Doctor { get; set; } = null!;
     }
 }

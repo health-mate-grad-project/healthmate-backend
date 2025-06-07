@@ -214,6 +214,21 @@ namespace healthmate_backend.Controllers
 
             return Ok(availableSlotDtos);
         }
+[Authorize(Roles = "Doctor")]
+[HttpPost("add-reminder")]
+public async Task<IActionResult> AddReminder([FromBody] CreateReminderRequest request)
+{
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var doctorId))
+        return Unauthorized(new { message = "Invalid token: no valid UserId" });
+
+    var success = await _doctorService.AddReminderAsync(request, doctorId);
+    if (!success)
+        return NotFound(new { message = "Patient not found" });
+
+    return Ok(new { message = "Reminder added successfully" });
+}
+
 
         
         
