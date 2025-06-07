@@ -17,24 +17,24 @@ namespace healthmate_backend.Controllers
         {
             _doctorService = doctorService;
         }
-[Authorize(Roles = "Doctor")]
-[HttpGet("pending-appointments")]
-public async Task<IActionResult> GetPendingAppointments()
-{
-    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-    if (userIdClaim == null)
-        return Unauthorized(new { message = "Invalid token: no UserId" });
+        [Authorize(Roles = "Doctor")]
+        [HttpGet("pending-appointments")]
+        public async Task<IActionResult> GetPendingAppointments()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
 
-    if (!int.TryParse(userIdClaim.Value, out var userId))
-        return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
 
-    var pendingAppointments = await _doctorService.GetPendingAppointmentsAsync(userId);
+            var pendingAppointments = await _doctorService.GetPendingAppointmentsAsync(userId);
 
-    if (pendingAppointments == null || !pendingAppointments.Any())
-        return NotFound(new { message = "No pending appointments found." });
+            if (pendingAppointments == null || !pendingAppointments.Any())
+                return NotFound(new { message = "No pending appointments found." });
 
-    return Ok(pendingAppointments);  // Return the list of simplified AppointmentDTOs
-}
+            return Ok(pendingAppointments);  // Return the list of simplified AppointmentDTOs
+        }
 
 
         [Authorize(Roles = "Doctor")]
@@ -72,25 +72,25 @@ public async Task<IActionResult> GetPendingAppointments()
 
             return Ok(new { message = "Doctor profile updated successfully" });
         }
-[Authorize(Roles = "Doctor")]
-[HttpPost("search-patients")]
-public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] PatientSearchRequest request)
-{
-     var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-    if (doctorIdClaim == null)
-        return Unauthorized("Doctor ID not found in token");
+        [Authorize(Roles = "Doctor")]
+        [HttpPost("search-patients")]
+        public async Task<IActionResult> SearchPatientsWithAppointments([FromBody] PatientSearchRequest request)
+        {
+             var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (doctorIdClaim == null)
+                return Unauthorized("Doctor ID not found in token");
 
-    var doctorId = int.Parse(doctorIdClaim.Value);
-    var patientName = request.PatientName;
+            var doctorId = int.Parse(doctorIdClaim.Value);
+            var patientName = request.PatientName;
 
-    var patients = await _doctorService.GetPatientsByDoctorAndNameAsync(doctorId, patientName);
+            var patients = await _doctorService.GetPatientsByDoctorAndNameAsync(doctorId, patientName);
 
-    if (patients == null || !patients.Any())
-        return NotFound("No matching patients found for this doctor.");
+            if (patients == null || !patients.Any())
+                return NotFound("No matching patients found for this doctor.");
 
-    return Ok(patients);
-}
-[Authorize(Roles = "Doctor")]
+            return Ok(patients);
+        }
+        [Authorize(Roles = "Doctor")]
         [HttpGet("doctor-details")]
         public async Task<IActionResult> GetDoctorDetails()
         {
