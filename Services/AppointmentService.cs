@@ -112,5 +112,20 @@ namespace healthmate_backend.Services
 
             return appointments;
         }
+        public async Task<bool> CancelAppointmentAsync(int appointmentId, int patientId)
+        {
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.PatientId == patientId);
+
+            if (appointment == null)
+                return false;
+
+            if (appointment.Status != "Pending" && appointment.Status != "Scheduled")
+                return false;
+
+            appointment.Status = "Cancelled";
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
