@@ -94,11 +94,12 @@ namespace healthmate_backend.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
-
-                    b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time(6)");
 
                     b.Property<bool>("IsBooked")
                         .HasColumnType("tinyint(1)");
@@ -332,7 +333,7 @@ namespace healthmate_backend.Migrations
                         .HasForeignKey("CreatedByPatientId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Doctor", null)
+                    b.HasOne("Doctor", "Doctor")
                         .WithMany("CreatedReminders")
                         .HasForeignKey("DoctorId");
 
@@ -345,6 +346,8 @@ namespace healthmate_backend.Migrations
                     b.Navigation("CreatedByDoctor");
 
                     b.Navigation("CreatedByPatient");
+
+                    b.Navigation("Doctor");
 
                     b.Navigation("Patient");
                 });

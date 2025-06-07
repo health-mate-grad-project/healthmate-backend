@@ -186,6 +186,25 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             return Ok(doctorDetails);
         }
 
+		[Authorize(Roles = "patient")]
+[HttpPost("add-reminder")]
+public async Task<IActionResult> AddReminderAsPatient([FromBody] CreateReminderRequest request)
+{
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (userIdClaim == null)
+        return Unauthorized(new { message = "Invalid token: no UserId" });
+
+    if (!int.TryParse(userIdClaim.Value, out var patientId))
+        return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+    var success = await _patientService.AddReminderAsync(request, patientId);
+    if (!success)
+        return BadRequest(new { message = "Failed to add reminder" });
+
+    return Ok(new { message = "Reminder added successfully" });
+}
+
+
 
     }
 }

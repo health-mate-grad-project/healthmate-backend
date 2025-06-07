@@ -1,4 +1,6 @@
 ﻿using healthmate_backend.Models;
+using healthmate_backend.Models.Request;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace healthmate_backend.Services
@@ -80,6 +82,31 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
+public async Task<bool> AddReminderAsync(CreateReminderRequest request, int patientId)
+{
+    var patient = await _context.Patients.FindAsync(patientId);
+    if (patient == null)
+        return false;
+
+    var reminder = new Reminder
+    {
+        MedicationName = request.MedicationName,
+        Dosage = request.Dosage,
+        Frequency = request.Frequency,
+        Notes = request.Notes,
+        Repeat = request.Repeat,
+        CreatedAt = DateTime.UtcNow,
+        PatientId = patientId,
+        Patient = patient,
+        CreatedByPatientId = patientId,
+        CreatedByPatient = patient
+    };
+
+    _context.Reminders.Add(reminder);
+    await _context.SaveChangesAsync();
+    return true;
+}
+
 
 
     }

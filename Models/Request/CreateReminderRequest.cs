@@ -2,7 +2,7 @@
 {
     public class CreateReminderRequest
     {
-        public int PatientId { get; set; }
+        public int? PatientId { get; set; }
         public string MedicationName { get; set; } = null!;
         public string Dosage { get; set; } = null!;
         public string Frequency { get; set; } = null!;
