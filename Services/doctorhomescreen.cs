@@ -21,8 +21,8 @@ namespace healthmate_backend.Services
             var appointments = await _context.Appointments
                 .Include(a => a.Patient)
                 .Where(a => a.DoctorId == doctorId &&
-                            a.Status == "Scheduled" &&
-                            a.Date >= currentDate)
+                            a.Status == "Scheduled" 
+                           )
                 .OrderBy(a => a.Date)
                 .ThenBy(a => a.Time)
                 .Select(a => new AppointmentDTO
