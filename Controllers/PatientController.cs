@@ -14,12 +14,15 @@ namespace healthmate_backend.Controllers
         private readonly AppDbContext _context;
         private readonly PatientService _patientService;
         private readonly DoctorService _doctorService;
+		private readonly GeoLocationService _geoLocationService;
 
-        public PatientController(PatientService patientService, AppDbContext context,DoctorService doctorService)
+        public PatientController(PatientService patientService, AppDbContext context,DoctorService doctorService,GeoLocationService geoLocationService)
         {
             _patientService = patientService;
             _context = context;
             _doctorService = doctorService;
+			_geoLocationService = geoLocationService;
+
         }
 
         [Authorize(Roles = "patient")]
@@ -202,6 +205,34 @@ public async Task<IActionResult> AddReminderAsPatient([FromBody] CreateReminderR
         return BadRequest(new { message = "Failed to add reminder" });
 
     return Ok(new { message = "Reminder added successfully" });
+}
+[Authorize(Roles = "patient")]
+[HttpGet("nearby-doctors-by-ip")]
+public async Task<IActionResult> GetNearbyDoctorsByIP()
+{
+    var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+    // If running locally, IP will be localhost ::1
+    if (string.IsNullOrEmpty(ip) || ip == "::1")
+        ip = "102.43.0.1"; // fallback IP for testing in Egypt
+
+    var city = await _geoLocationService.GetCityFromIP(ip);
+    if (city == null)
+        return BadRequest(new { message = "Could not determine location." });
+
+    var doctors = await _context.Doctors
+        .Include(d => d.Clinics)
+        .Where(d => d.Clinics.Any(c => c.Location.Contains(city)))
+        .Select(d => new DoctorSearchResponse
+        {
+            DoctorName = d.Username,
+            Speciality = d.Speciality,
+            AverageRating = d.AverageRating,
+            TotalRatings = d.TotalRatings,
+            FilledStars = (int)Math.Round(d.AverageRating)
+        }).ToListAsync();
+
+    return Ok(doctors);
 }
 
 
