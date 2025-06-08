@@ -1,6 +1,9 @@
 ﻿using healthmate_backend.DTOs;
 using healthmate_backend.Models;
 using Microsoft.EntityFrameworkCore;
+using healthmate_backend.Models.Request;
+
+
 
 namespace healthmate_backend.Services
 {
@@ -127,5 +130,40 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        
+        public async Task<bool> RescheduleAppointmentAsync(int patientId, RescheduleAppointmentRequest req)
+        {
+            var appt = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == req.AppointmentId && a.PatientId == patientId);
+
+            if (appt == null ||
+                (appt.Status != "Pending" && appt.Status != "Upcoming"))
+                return false;
+
+            var slot = await _context.AvailableSlots
+                .Include(s => s.Doctor)
+                .FirstOrDefaultAsync(s => s.Id == req.NewSlotId);
+
+            if (slot == null || slot.IsBooked || slot.DoctorId != appt.DoctorId)
+                return false;
+
+            var oldSlot = await _context.AvailableSlots
+                .FirstOrDefaultAsync(s => s.Id == appt.AvailableSlotId);
+            if (oldSlot != null) oldSlot.IsBooked = false;
+
+            appt.Date = slot.Date.Date;
+            appt.Time = slot.StartTime;
+            appt.AvailableSlotId = slot.Id;
+            appt.Status = "Upcoming";
+
+            slot.IsBooked = true;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
+        
     }
+    
+   
 }

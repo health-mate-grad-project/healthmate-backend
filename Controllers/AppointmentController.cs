@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using healthmate_backend.Services;
+using healthmate_backend.Models.Request;
+
 
 namespace healthmate_backend.Controllers
 {
@@ -100,5 +102,24 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Appointment cancelled successfully" });
         }
+        
+        [Authorize(Roles = "patient")]
+        [HttpPut("reschedule-appointment")]
+        public async Task<IActionResult> RescheduleAppointment(
+            [FromBody] RescheduleAppointmentRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            var ok = await _appointmentService.RescheduleAppointmentAsync(patientId, request);
+            if (!ok)
+                return BadRequest(new { message = "Unable to reschedule appointment." });
+
+            return Ok(new { message = "Appointment rescheduled successfully." });
+        }
+
     }
+    
+    
 }

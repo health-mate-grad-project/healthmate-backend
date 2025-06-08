@@ -207,4 +207,10 @@ public async Task<IActionResult> AddReminderAsPatient([FromBody] CreateReminderR
 
 
     }
+    
+    
+
 }
+
+
+
