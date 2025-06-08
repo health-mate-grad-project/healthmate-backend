@@ -25,17 +25,13 @@ namespace healthmate_backend.Services
             if (appointment == null)
                 return false;
 
-            // Check if the appointment is in 'Pending' state
             if (appointment.Status != "Pending")
             {
-                // If it's not Pending, return false (failure)
                 return false;
             }
 
-            // Update the appointment status to 'Scheduled'
             appointment.Status = "Scheduled";
 
-            // Save changes to the database
             await _context.SaveChangesAsync();
 
             return true;
@@ -137,7 +133,7 @@ namespace healthmate_backend.Services
                 .FirstOrDefaultAsync(a => a.Id == req.AppointmentId && a.PatientId == patientId);
 
             if (appt == null ||
-                (appt.Status != "Pending" && appt.Status != "Upcoming"))
+                (appt.Status != "Pending" && appt.Status != "Scheduled"))
                 return false;
 
             var slot = await _context.AvailableSlots
@@ -154,7 +150,7 @@ namespace healthmate_backend.Services
             appt.Date = slot.Date.Date;
             appt.Time = slot.StartTime;
             appt.AvailableSlotId = slot.Id;
-            appt.Status = "Upcoming";
+            appt.Status = "Rescheduled";
 
             slot.IsBooked = true;
 
@@ -162,6 +158,61 @@ namespace healthmate_backend.Services
             return true;
         }
         
+        public async Task<bool> BookAppointmentAsync(int patientId, BookingAppointmentRequest req)
+        {
+            // Check slot availability and doctor
+            var slot = await _context.AvailableSlots
+                .Include(s => s.Doctor)
+                .FirstOrDefaultAsync(s => s.Id == req.AvailableSlotId && s.DoctorId == req.DoctorId);
+
+            if (slot == null || slot.IsBooked)
+            {
+                // _logger.LogWarning("Slot invalid or already booked. SlotId: {SlotId}, IsBooked: {IsBooked}", req.AvailableSlotId, slot?.IsBooked);
+
+                return false;
+            }
+
+            // Check if patient already has an appointment at the same date/time (and not cancelled or past)
+            var hasConflict = await _context.Appointments
+                .AnyAsync(a => a.PatientId == patientId &&
+                               a.Date == slot.Date.Date &&
+                               a.Time == slot.StartTime &&
+                               a.Status != "Cancelled" && a.Status != "Past");
+
+            if (hasConflict)
+                return false;
+
+            var patient = await _context.Patients.FindAsync(patientId);
+            var doctor = await _context.Doctors.FindAsync(req.DoctorId);
+            
+            if (patient == null || doctor == null)
+                return false;
+            
+            // Create the appointment entity with your model's required fields
+            var appointment = new Appointment
+            {
+                PatientId = patientId,
+                Patient = patient,  
+                DoctorId = req.DoctorId,
+                Doctor = doctor,    
+                AppointmentType = req.AppointmentType,
+                Content = req.Content,
+                Date = slot.Date.Date,
+                Time = slot.StartTime,
+                AvailableSlotId = slot.Id,
+                Status = "Scheduled", 
+                IsRated = false
+            };
+
+            // Mark the slot as booked
+            slot.IsBooked = true;
+
+            _context.Appointments.Add(appointment);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
         
     }
     

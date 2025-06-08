@@ -105,8 +105,7 @@ namespace healthmate_backend.Controllers
         
         [Authorize(Roles = "patient")]
         [HttpPut("reschedule-appointment")]
-        public async Task<IActionResult> RescheduleAppointment(
-            [FromBody] RescheduleAppointmentRequest request)
+        public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppointmentRequest request)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
@@ -118,8 +117,31 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Appointment rescheduled successfully." });
         }
+        
+        
+        
+        
+        [Authorize(Roles = "patient")]
+        [HttpPost("book")]
+        public async Task<IActionResult> BookAppointment([FromBody] BookingAppointmentRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            var result = await _appointmentService.BookAppointmentAsync(patientId, request);
+
+            if (!result)
+                return BadRequest(new { message = "Unable to book appointment." });
+
+            return Ok(new { message = "Appointment booked successfully." });
+        }
+
+
 
     }
+    
+    
     
     
 }
