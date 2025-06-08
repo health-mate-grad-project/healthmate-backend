@@ -62,6 +62,8 @@ builder.Services.AddScoped<PatientService>();
 builder.Services.AddScoped<DoctorService>();
 builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<DoctorHomeScreenService>();
+builder.Services.AddScoped<GeoLocationService>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 app.UseCors("AllowFlutterWeb");
