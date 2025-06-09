@@ -211,13 +211,15 @@ public async Task<IActionResult> AddReminderAsPatient([FromBody] CreateReminderR
 [HttpGet("nearby-doctors")]
 public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
 {
-    // Fallback to IP if city is not provided
+    // Fallback to IP only if city is not provided
     if (string.IsNullOrWhiteSpace(city))
     {
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
 
         if (string.IsNullOrEmpty(ip) || ip == "::1")
-            ip = "102.43.0.1"; // fallback IP for local testing
+        {
+            return BadRequest(new { message = "Could not determine IP address for location lookup." });
+        }
 
         Console.WriteLine("IP Address Used: " + ip);
         city = await _geoLocationService.GetCityFromIP(ip);
@@ -236,12 +238,12 @@ public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
             AverageRating = d.AverageRating,
             FilledStars = (int)Math.Round(d.AverageRating),
             Clinics = d.Clinics
-			.Where(c => c.Location.Contains(city))
-			.Select(c => new ClinicDto
-            {
-                Name = c.Name,
-                Location = c.Location
-            }).ToList()
+                .Where(c => c.Location.Contains(city))
+                .Select(c => new ClinicDto
+                {
+                    Name = c.Name,
+                    Location = c.Location
+                }).ToList()
         }).ToListAsync();
 
     return Ok(doctors);
