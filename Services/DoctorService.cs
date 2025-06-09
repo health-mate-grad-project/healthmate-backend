@@ -222,6 +222,10 @@ public async Task<bool> UpdateAppointmentStatusAsync(int appointmentId, string s
     await _context.SaveChangesAsync();
     return true;
 }
+public async Task<Appointment?> GetAppointmentByIdAsync(int appointmentId)
+{
+    return await _context.Appointments.FindAsync(appointmentId);
+}
 
         
     }

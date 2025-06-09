@@ -235,7 +235,7 @@ public async Task<IActionResult> AddReminder([FromBody] CreateReminderRequest re
 [HttpPut("update-appointment-status/{id}")]
 public async Task<IActionResult> UpdateAppointmentStatus(int id, [FromQuery] string status)
 {
-    var validStatuses = new[] { "Scheduled", "InProgress", "Completed", "Cancelled" };
+var validStatuses = new[] { "Scheduled", "InProgress", "Completed", "Cancelled", "ReadyToComplete" };
     if (!validStatuses.Contains(status))
         return BadRequest(new { message = "Invalid status value." });
 
@@ -244,6 +244,16 @@ public async Task<IActionResult> UpdateAppointmentStatus(int id, [FromQuery] str
         return NotFound(new { message = "Appointment not found" });
 
     return Ok(new { message = $"Appointment status updated to {status}" });
+}
+[Authorize(Roles = "Doctor")]
+[HttpGet("get-appointment-status/{appointmentId}")]
+public async Task<IActionResult> GetAppointmentStatus(int appointmentId)
+{
+    var appointment = await _doctorService.GetAppointmentByIdAsync(appointmentId);
+    if (appointment == null)
+        return NotFound(new { message = "Appointment not found" });
+
+    return Ok(new { status = appointment.Status });
 }
 
 
