@@ -94,31 +94,38 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
-        public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
-        {
-            var doctor = await _context.Doctors
-                .Include(d => d.Clinics)
-                .FirstOrDefaultAsync(d => d.Id == doctorId);
+       public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
+{
+    var doctor = await _context.Doctors
+        .Include(d => d.Clinics)
+        .FirstOrDefaultAsync(d => d.Id == doctorId);
 
-            if (doctor == null)
-                return null;
+    if (doctor == null)
+        return null;
 
-            // Get the first clinic's location if available
-            var location = doctor.Clinics.FirstOrDefault()?.Location ?? "No location available";
+    var location = doctor.Clinics.FirstOrDefault()?.Location ?? "No location available";
 
-            return new DoctorDto
-            {
-                Id = doctor.Id,
-                Username = doctor.Username,
-                Email = doctor.Email,
-                License = doctor.License,
-                Speciality = doctor.Speciality,
-                ExperienceYear = doctor.ExperienceYear,
-                AverageRating = doctor.AverageRating,
-                TotalRatings = doctor.TotalRatings,
-                Location = location  // Assign location from the clinic
-            };
-        }
+    var clinics = doctor.Clinics.Select(c => new ClinicDto
+    {
+        Name = c.Name,
+        Location = c.Location
+    }).ToList();
+
+    return new DoctorDto
+    {
+        Id = doctor.Id,
+        Username = doctor.Username,
+        Email = doctor.Email,
+        License = doctor.License,
+        Speciality = doctor.Speciality,
+        ExperienceYear = doctor.ExperienceYear,
+        AverageRating = doctor.AverageRating,
+        TotalRatings = doctor.TotalRatings,
+        Location = location,
+        Clinics = clinics 
+    };
+}
+
 
         public async Task<List<AppointmentDTO>> GetPendingAppointmentsAsync(int doctorId)
         {
