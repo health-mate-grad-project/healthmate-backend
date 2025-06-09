@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using healthmate_backend.Services;
 using healthmate_backend.Models.Request;
+using healthmate_backend.Models.DTOs;
+using healthmate_backend.Models;
 
 
 namespace healthmate_backend.Controllers
@@ -11,10 +13,12 @@ namespace healthmate_backend.Controllers
     public class AppointmentController : ControllerBase
     {
         private readonly AppointmentService _appointmentService;
+        private readonly DoctorService _doctorService;
 
-        public AppointmentController(AppointmentService appointmentService)
+        public AppointmentController(AppointmentService appointmentService , DoctorService doctorService)
         {
             _appointmentService = appointmentService;
+            _doctorService      = doctorService;
         }
 
         [Authorize(Roles = "Doctor")]
@@ -118,9 +122,8 @@ namespace healthmate_backend.Controllers
             return Ok(new { message = "Appointment rescheduled successfully." });
         }
         
-        
-        
-        
+   
+     
         [Authorize(Roles = "patient")]
         [HttpPost("book")]
         public async Task<IActionResult> BookAppointment([FromBody] BookingAppointmentRequest request)
@@ -136,7 +139,45 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Appointment booked successfully." });
         }
+        
+        
+        
+        [Authorize(Roles = "patient")] 
+        [HttpGet("get-available-slots-for-doctor/{doctorId}")]
+        public async Task<IActionResult> GetAvailableSlotsForDoctor(int doctorId)
+        {
+            var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
+            if (doctor == null)
+                return NotFound(new { message = "Doctor not found" });
 
+            var availableSlots = await _doctorService.GetAvailableSlotsAsync(doctorId);
+            if (availableSlots == null || !availableSlots.Any())
+                return NotFound(new { message = "No available slots found" });
+
+            var slotDtos = availableSlots.Select(slot => new AvailableSlotDto
+            {
+                Id = slot.Id,
+                Date = slot.Date,
+                StartTime = slot.StartTime,
+                IsBooked = slot.IsBooked,
+                DayOfWeek = slot.DayOfWeek,
+                DoctorId = slot.DoctorId,
+                Doctor = new DoctorDto
+                {
+                    Id = doctor.Id,
+                    Username = doctor.Username,
+                    Email = doctor.Email,
+                    License = doctor.License,
+                    Speciality = doctor.Speciality,
+                    ExperienceYear = doctor.ExperienceYear,
+                    AverageRating = doctor.AverageRating,
+                    TotalRatings = doctor.TotalRatings,
+                    // Location = location 
+                }
+            }).ToList();
+
+            return Ok(slotDtos);
+        }
 
 
     }
