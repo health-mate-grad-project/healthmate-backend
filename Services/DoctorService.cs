@@ -213,6 +213,15 @@ public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doct
     await _context.SaveChangesAsync();
     return true;
 }
+public async Task<bool> UpdateAppointmentStatusAsync(int appointmentId, string status)
+{
+    var appointment = await _context.Appointments.FindAsync(appointmentId);
+    if (appointment == null) return false;
+
+    appointment.Status = status;
+    await _context.SaveChangesAsync();
+    return true;
+}
 
         
     }
