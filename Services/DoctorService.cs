@@ -30,6 +30,7 @@ namespace healthmate_backend.Services
             foreach (var clinicName in request.Clinics.Distinct())
             {
                 var existingClinic = await _context.Clinics
+                    .Include(c => c.Doctors)
                     .FirstOrDefaultAsync(c => c.Name == clinicName);
 
                 if (existingClinic == null)
@@ -37,22 +38,31 @@ namespace healthmate_backend.Services
                     existingClinic = new Clinic
                     {
                         Name = clinicName,
-                        Location = "Unknown", 
-                        Doctors = new List<Doctor>() 
+                        Location = "Unknown",
+                        Doctors = new List<Doctor>()
                     };
 
                     _context.Clinics.Add(existingClinic);
-                    await _context.SaveChangesAsync();
+                }
+
+                if (!existingClinic.Doctors.Contains(doctor))
+                {
+                    existingClinic.Doctors.Add(doctor);
                 }
 
                 clinicEntities.Add(existingClinic);
             }
 
-            doctor.Clinics = clinicEntities;
-            await _context.SaveChangesAsync();
+            doctor.Clinics.Clear();
+            foreach (var clinic in clinicEntities)
+            {
+                doctor.Clinics.Add(clinic);
+            }
 
+            await _context.SaveChangesAsync();
             return true;
         }
+
         
         public async Task<bool> UpdateProfileAsync(int id, UpdateDoctorProfileRequest request)
         {

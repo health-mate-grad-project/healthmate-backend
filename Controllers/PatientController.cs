@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using healthmate_backend.Services;
 using healthmate_backend.Models;
 using healthmate_backend.Models.Request;
+using healthmate_backend.Models.DTOs;
 
 namespace healthmate_backend.Controllers
 {
@@ -207,17 +208,22 @@ public async Task<IActionResult> AddReminderAsPatient([FromBody] CreateReminderR
     return Ok(new { message = "Reminder added successfully" });
 }
 [Authorize(Roles = "patient")]
-[HttpGet("nearby-doctors-by-ip")]
-public async Task<IActionResult> GetNearbyDoctorsByIP()
+[HttpGet("nearby-doctors")]
+public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
 {
-    var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+    // Fallback to IP if city is not provided
+    if (string.IsNullOrWhiteSpace(city))
+    {
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-    // If running locally, IP will be localhost ::1
-    if (string.IsNullOrEmpty(ip) || ip == "::1")
-        ip = "102.43.0.1"; // fallback IP for testing in Egypt
+        if (string.IsNullOrEmpty(ip) || ip == "::1")
+            ip = "102.43.0.1"; // fallback IP for local testing
 
-    var city = await _geoLocationService.GetCityFromIP(ip);
-    if (city == null)
+        Console.WriteLine("IP Address Used: " + ip);
+        city = await _geoLocationService.GetCityFromIP(ip);
+    }
+
+    if (string.IsNullOrWhiteSpace(city))
         return BadRequest(new { message = "Could not determine location." });
 
     var doctors = await _context.Doctors
@@ -228,12 +234,19 @@ public async Task<IActionResult> GetNearbyDoctorsByIP()
             DoctorName = d.Username,
             Speciality = d.Speciality,
             AverageRating = d.AverageRating,
-            TotalRatings = d.TotalRatings,
-            FilledStars = (int)Math.Round(d.AverageRating)
+            FilledStars = (int)Math.Round(d.AverageRating),
+            Clinics = d.Clinics
+			.Where(c => c.Location.Contains(city))
+			.Select(c => new ClinicDto
+            {
+                Name = c.Name,
+                Location = c.Location
+            }).ToList()
         }).ToListAsync();
 
     return Ok(doctors);
 }
+
 
 
 
