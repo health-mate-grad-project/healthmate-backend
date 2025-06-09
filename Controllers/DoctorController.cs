@@ -7,6 +7,7 @@ using healthmate_backend.Models.Request;
 
 namespace healthmate_backend.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class DoctorController : ControllerBase
@@ -16,6 +17,7 @@ namespace healthmate_backend.Controllers
         public DoctorController(DoctorService doctorService)
         {
             _doctorService = doctorService;
+			
         }
         [Authorize(Roles = "Doctor")]
         [HttpGet("pending-appointments")]
@@ -227,6 +229,31 @@ public async Task<IActionResult> AddReminder([FromBody] CreateReminderRequest re
         return NotFound(new { message = "Patient not found" });
 
     return Ok(new { message = "Reminder added successfully" });
+}
+
+[Authorize(Roles = "Doctor")]
+[HttpPut("update-appointment-status/{id}")]
+public async Task<IActionResult> UpdateAppointmentStatus(int id, [FromQuery] string status)
+{
+var validStatuses = new[] { "Scheduled", "InProgress", "Completed", "Cancelled", "ReadyToComplete" };
+    if (!validStatuses.Contains(status))
+        return BadRequest(new { message = "Invalid status value." });
+
+    var success = await _doctorService.UpdateAppointmentStatusAsync(id, status);
+    if (!success)
+        return NotFound(new { message = "Appointment not found" });
+
+    return Ok(new { message = $"Appointment status updated to {status}" });
+}
+[Authorize(Roles = "Doctor")]
+[HttpGet("get-appointment-status/{appointmentId}")]
+public async Task<IActionResult> GetAppointmentStatus(int appointmentId)
+{
+    var appointment = await _doctorService.GetAppointmentByIdAsync(appointmentId);
+    if (appointment == null)
+        return NotFound(new { message = "Appointment not found" });
+
+    return Ok(new { status = appointment.Status });
 }
 
 
