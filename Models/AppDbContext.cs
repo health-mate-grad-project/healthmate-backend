@@ -11,6 +11,8 @@ public class AppDbContext : DbContext
     public DbSet<Clinic> Clinics { get; set; }
     public DbSet<Reminder> Reminders { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
+    
+    public DbSet<DoseTaken> DoseTakens { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -53,6 +55,16 @@ public class AppDbContext : DbContext
             .HasOne(a => a.Doctor)
             .WithMany(d => d.Appointments)
             .HasForeignKey(a => a.DoctorId);
+        modelBuilder.Entity<DoseTaken>()
+            .HasKey(d => new { d.ReminderId, d.ScheduledTimeUtc });
+        
+        modelBuilder.Entity<DoseTaken>()
+            .HasOne(d => d.Reminder)
+            .WithMany()                            // no nav prop needed
+            .HasForeignKey(d => d.ReminderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        
 modelBuilder.Entity<AvailableSlot>()
     .HasOne(s => s.Doctor)
     .WithMany(d => d.AvailableSlots)

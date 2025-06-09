@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace healthmate_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250429183424_AddDoctorRatingFields")]
-    partial class AddDoctorRatingFields
+    [Migration("20250609203819_InitialDoseFix")]
+    partial class InitialDoseFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,7 +61,13 @@ namespace healthmate_backend.Migrations
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsRated")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Rating")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -78,6 +84,37 @@ namespace healthmate_backend.Migrations
                     b.HasIndex("PatientId");
 
                     b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("healthmate_backend.Models.AvailableSlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsBooked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("AvailableSlots");
                 });
 
             modelBuilder.Entity("healthmate_backend.Models.Clinic", b =>
@@ -99,6 +136,22 @@ namespace healthmate_backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Clinics");
+                });
+
+            modelBuilder.Entity("healthmate_backend.Models.DoseTaken", b =>
+                {
+                    b.Property<int>("ReminderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledTimeUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("TakenTimeUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("ReminderId", "ScheduledTimeUtc");
+
+                    b.ToTable("DoseTakens");
                 });
 
             modelBuilder.Entity("healthmate_backend.Models.Reminder", b =>
@@ -172,6 +225,9 @@ namespace healthmate_backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -232,6 +288,10 @@ namespace healthmate_backend.Migrations
                     b.Property<float>("Weight")
                         .HasColumnType("float");
 
+                    b.Property<string>("medicalHistory")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.ToTable("Patients", (string)null);
                 });
 
@@ -269,6 +329,28 @@ namespace healthmate_backend.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("healthmate_backend.Models.AvailableSlot", b =>
+                {
+                    b.HasOne("Doctor", "Doctor")
+                        .WithMany("AvailableSlots")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("healthmate_backend.Models.DoseTaken", b =>
+                {
+                    b.HasOne("healthmate_backend.Models.Reminder", "Reminder")
+                        .WithMany()
+                        .HasForeignKey("ReminderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reminder");
+                });
+
             modelBuilder.Entity("healthmate_backend.Models.Reminder", b =>
                 {
                     b.HasOne("Doctor", "CreatedByDoctor")
@@ -281,7 +363,7 @@ namespace healthmate_backend.Migrations
                         .HasForeignKey("CreatedByPatientId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Doctor", null)
+                    b.HasOne("Doctor", "Doctor")
                         .WithMany("CreatedReminders")
                         .HasForeignKey("DoctorId");
 
@@ -294,6 +376,8 @@ namespace healthmate_backend.Migrations
                     b.Navigation("CreatedByDoctor");
 
                     b.Navigation("CreatedByPatient");
+
+                    b.Navigation("Doctor");
 
                     b.Navigation("Patient");
                 });
@@ -319,6 +403,8 @@ namespace healthmate_backend.Migrations
             modelBuilder.Entity("Doctor", b =>
                 {
                     b.Navigation("Appointments");
+
+                    b.Navigation("AvailableSlots");
 
                     b.Navigation("CreatedReminders");
                 });

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace healthmate_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialDoseFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,6 +45,8 @@ namespace healthmate_backend.Migrations
                     Email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ProfileImageUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -62,7 +64,9 @@ namespace healthmate_backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Speciality = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ExperienceYear = table.Column<int>(type: "int", nullable: false)
+                    ExperienceYear = table.Column<int>(type: "int", nullable: false),
+                    AverageRating = table.Column<double>(type: "double", nullable: false),
+                    TotalRatings = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,6 +91,8 @@ namespace healthmate_backend.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Birthdate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Location = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    medicalHistory = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -96,6 +102,31 @@ namespace healthmate_backend.Migrations
                         name: "FK_Patients_Users_Id",
                         column: x => x.Id,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AvailableSlots",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    IsBooked = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DayOfWeek = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DoctorId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AvailableSlots", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AvailableSlots_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -140,6 +171,8 @@ namespace healthmate_backend.Migrations
                     Time = table.Column<TimeSpan>(type: "time(6)", nullable: false),
                     Content = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsRated = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: true),
                     PatientId = table.Column<int>(type: "int", nullable: false),
                     DoctorId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -211,6 +244,26 @@ namespace healthmate_backend.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "DoseTakens",
+                columns: table => new
+                {
+                    ReminderId = table.Column<int>(type: "int", nullable: false),
+                    ScheduledTimeUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    TakenTimeUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DoseTakens", x => new { x.ReminderId, x.ScheduledTimeUtc });
+                    table.ForeignKey(
+                        name: "FK_DoseTakens_Reminders_ReminderId",
+                        column: x => x.ReminderId,
+                        principalTable: "Reminders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
                 table: "Appointments",
@@ -220,6 +273,11 @@ namespace healthmate_backend.Migrations
                 name: "IX_Appointments_PatientId",
                 table: "Appointments",
                 column: "PatientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AvailableSlots_DoctorId",
+                table: "AvailableSlots",
+                column: "DoctorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DoctorClinics_DoctorsId",
@@ -254,13 +312,19 @@ namespace healthmate_backend.Migrations
                 name: "Appointments");
 
             migrationBuilder.DropTable(
+                name: "AvailableSlots");
+
+            migrationBuilder.DropTable(
                 name: "DoctorClinics");
 
             migrationBuilder.DropTable(
-                name: "Reminders");
+                name: "DoseTakens");
 
             migrationBuilder.DropTable(
                 name: "Clinics");
+
+            migrationBuilder.DropTable(
+                name: "Reminders");
 
             migrationBuilder.DropTable(
                 name: "Doctors");

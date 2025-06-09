@@ -135,6 +135,22 @@ namespace healthmate_backend.Migrations
                     b.ToTable("Clinics");
                 });
 
+            modelBuilder.Entity("healthmate_backend.Models.DoseTaken", b =>
+                {
+                    b.Property<int>("ReminderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledTimeUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("TakenTimeUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("ReminderId", "ScheduledTimeUtc");
+
+                    b.ToTable("DoseTakens");
+                });
+
             modelBuilder.Entity("healthmate_backend.Models.Reminder", b =>
                 {
                     b.Property<int>("Id")
@@ -319,6 +335,17 @@ namespace healthmate_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("healthmate_backend.Models.DoseTaken", b =>
+                {
+                    b.HasOne("healthmate_backend.Models.Reminder", "Reminder")
+                        .WithMany()
+                        .HasForeignKey("ReminderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reminder");
                 });
 
             modelBuilder.Entity("healthmate_backend.Models.Reminder", b =>
