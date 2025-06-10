@@ -279,7 +279,7 @@ namespace healthmate_backend.Services
                 Date = slot.Date.Date,
                 Time = slot.StartTime,
                 AvailableSlotId = slot.Id,
-                Status = "Scheduled", 
+                Status = "Pending", 
                 IsRated = false
             };
 
