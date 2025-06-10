@@ -66,6 +66,7 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             (request.Speciality != null && d.Doctor.Speciality.Contains(request.Speciality))) // Search by speciality
         .Select(d => new DoctorSearchResponse
         {
+            DoctorId = d.Doctor.Id,                             // ✅ Include this line
             DoctorName = d.User.Username, // Doctor's name comes from the Users table
             Speciality = d.Doctor.Speciality,
             AverageRating = d.Doctor.AverageRating,
