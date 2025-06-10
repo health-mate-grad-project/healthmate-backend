@@ -16,9 +16,28 @@ public class ReminderController : ControllerBase
 
     // GET …/reminders/today
     [HttpGet("today")]
-    public async Task<IActionResult> GetToday(int patientId)
+    public async Task<IActionResult> GetToday(
+        int patientId,
+        [FromQuery(Name = "date")] string date)
     {
-        var items = await _svc.GetTodayAsync(patientId, DateTime.UtcNow);
+        // parse YYYY-MM-DD or default to today
+        DateTime dayUtc;
+        if (!string.IsNullOrEmpty(date)
+            && DateTime.TryParseExact(
+                date,
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsedDate))
+        {
+            dayUtc = DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc);
+        }
+        else
+        {
+            dayUtc = DateTime.UtcNow.Date;
+        }
+
+        var items = await _svc.GetTodayAsync(patientId, dayUtc);
         return Ok(items);
     }
 
@@ -41,5 +60,33 @@ public class ReminderController : ControllerBase
         return ok ? Ok() : NotFound();
     }
   
+    
+    // Returns every scheduled dose for today + tomorrow by default.
+    [HttpGet("upcoming")]
+    public async Task<IActionResult> GetUpcoming(
+        int patientId,
+        [FromQuery(Name = "date")] string date,
+        [FromQuery(Name = "days")] int days = 2)
+    {
+        // parse the start date or default to UTC today
+        DateTime startUtc;
+        if (!string.IsNullOrEmpty(date) &&
+            DateTime.TryParseExact(
+                date,
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed))
+        {
+            startUtc = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+        }
+        else
+        {
+            startUtc = DateTime.UtcNow.Date;
+        }
+
+        var list = await _svc.GetUpcomingAsync(patientId, startUtc, days);
+        return Ok(list);
+    }
 
 }

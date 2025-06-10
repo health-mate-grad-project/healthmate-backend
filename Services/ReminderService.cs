@@ -1,121 +1,200 @@
-﻿using healthmate_backend.Models.DTOs;
-
-namespace healthmate_backend.Services;
-using System.Text.RegularExpressions;
+﻿using healthmate_backend.DTOs;
 using healthmate_backend.Models;
-using healthmate_backend.DTOs;
+using healthmate_backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-public class ReminderService
+namespace healthmate_backend.Services
 {
-    private readonly AppDbContext _db;
-    public ReminderService(AppDbContext db) => _db = db;
-
-    /* -----------------------------------------------------------
-       Public API
-    ----------------------------------------------------------- */
-
-    public async Task<List<ReminderTodayDto>> GetTodayAsync(int patientId, DateTime todayUtc)
+    public class ReminderService
     {
-        var midnight = todayUtc.Date;
-        var end      = midnight.AddDays(1);
+        private readonly AppDbContext _db;
+        public ReminderService(AppDbContext db) => _db = db;
 
-        // bring all active reminders for the patient
-        var reminders = await _db.Reminders
-            .Where(r => r.PatientId == patientId && r.Repeat == true)
-            .ToListAsync();
-
-        var result = new List<ReminderTodayDto>();
-
-        foreach (var r in reminders)
+        /* ────────────────────────────────────────────────────────────
+           PUBLIC API
+        ──────────────────────────────────────────────────────────── */
+        public async Task<List<ReminderTodayDto>> GetTodayAsync(
+            int patientId, DateTime dayUtc)
         {
-            var schedule = BuildScheduleForDay(r, midnight, end);
+            var midnight = dayUtc;
+            var end      = midnight.AddDays(1);
 
-            // read DoseTaken rows for those schedule-times
-            var takenKeys = await _db.DoseTakens
-                .Where(d => d.ReminderId == r.Id &&
-                            d.ScheduledTimeUtc >= midnight &&
-                            d.ScheduledTimeUtc <  end)
-                .Select(d => d.ScheduledTimeUtc)
+            var reminders = await _db.Reminders
+                .Where(r => r.PatientId == patientId && r.Repeat)
                 .ToListAsync();
 
-            var dtoSchedule = schedule
-                .Select(t => new ReminderDoseDto(t,
-                                takenKeys.Contains(t)))
-                .ToList();
+            var result = new List<ReminderTodayDto>();
+            foreach (var r in reminders)
+            {
+                var schedule = BuildScheduleForDay(r, midnight, end);
 
-            result.Add(new ReminderTodayDto(
-                r.Id,
-                r.MedicationName,
-                r.Dosage,
-                r.Notes ?? string.Empty,
-                dtoSchedule));
+                var takenKeys = await _db.DoseTakens
+                    .Where(d => d.ReminderId == r.Id &&
+                                d.ScheduledTimeUtc >= midnight &&
+                                d.ScheduledTimeUtc <  end)
+                    .Select(d => d.ScheduledTimeUtc)
+                    .ToListAsync();
+
+                var dtoSchedule = schedule
+                    .Select(t => new ReminderDoseDto(
+                        t, takenKeys.Contains(t)))
+                    .ToList();
+
+                result.Add(new ReminderTodayDto(
+                    r.Id,
+                    r.MedicationName,
+                    r.Dosage,
+                    r.Notes ?? string.Empty,
+                    dtoSchedule));
+            }
+
+            return result;
         }
 
-        return result;
-    }
-
-    public async Task<bool> MarkDoseTakenAsync(
-        int reminderId, DateTime scheduledUtc, int patientId)
-    {
-        // quick ownership check
-        var belongs = await _db.Reminders
-            .AnyAsync(r => r.Id == reminderId && r.PatientId == patientId);
-        if (!belongs) return false;
-
-        var entry = await _db.DoseTakens.FindAsync(reminderId, scheduledUtc);
-        if (entry != null) return true;               // already marked
-
-        _db.DoseTakens.Add(new DoseTaken
+        public async Task<bool> MarkDoseTakenAsync(
+            int reminderId, DateTime scheduledUtc, int patientId)
         {
-            ReminderId        = reminderId,
-            ScheduledTimeUtc  = scheduledUtc,
-            TakenTimeUtc      = DateTime.UtcNow
-        });
-        await _db.SaveChangesAsync();
-        return true;
-    }
+            var belongs = await _db.Reminders
+                .AnyAsync(r => r.Id == reminderId && r.PatientId == patientId);
+            if (!belongs) return false;
 
-    /* -----------------------------------------------------------
-       Helpers
-    ----------------------------------------------------------- */
-    private static List<DateTime> BuildScheduleForDay(Reminder r, DateTime startUtc, DateTime endUtc)
-    {
-        var list = new List<DateTime>();
-        var interval = GetIntervalMinutes(r.Frequency);
-        if (interval <= 0) return list;
+            var entry = await _db.DoseTakens.FindAsync(reminderId, scheduledUtc);
+            if (entry != null) return true; // already marked
 
-        var first = r.CreatedAt;
-        while (first < startUtc) first = first.AddMinutes(interval);
+            _db.DoseTakens.Add(new DoseTaken
+            {
+                ReminderId       = reminderId,
+                ScheduledTimeUtc = scheduledUtc,
+                TakenTimeUtc     = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+            return true;
+        }
 
-        int maxDoses = 0;
-        int.TryParse(r.Dosage, out maxDoses); // assuming Dosage is stored as string
+        /* ────────────────────────────────────────────────────────────
+           HELPER – per-day schedule
+        ──────────────────────────────────────────────────────────── */
+        private static List<DateTime> BuildScheduleForDay(
+            Reminder r,
+            DateTime startUtc,
+            DateTime endUtc)
+        {
+            var list     = new List<DateTime>();
+            var interval = GetIntervalMinutes(r.Frequency);
+            if (interval <= 0) return list;
 
-        for (var t = first; t < endUtc && list.Count < maxDoses; t = t.AddMinutes(interval))
-            list.Add(t);
+            if (!int.TryParse(r.Dosage, out var totalDoses) || totalDoses <= 0)
+                return list;
 
-        return list;
-    }
+            var first = r.CreatedAt;
+            for (var i = 0; i < totalDoses; i++)
+            {
+                var t = first.AddMinutes(interval * i);
+                if (t >= endUtc) break;                 //  ← guard
+                if (t >= startUtc) list.Add(t);
+            }
 
- 
-    /// Parses "Every 8 hours", "Once daily", "4", etc.
-    /// returns interval in minutes (>= 0). 0 => unsupported.
-    private static int GetIntervalMinutes(string frequency)
-    {
-        frequency = frequency.ToLower().Trim();
+            return list;
+        }
 
-        if (frequency.Contains("once"))
-            return 24 * 60;
+        /* ────────────────────────────────────────────────────────────
+           HELPER – “upcoming” window
+        ──────────────────────────────────────────────────────────── */
+        public async Task<List<ReminderDoseWindowDto>> GetUpcomingAsync(
+            int      patientId,
+            DateTime startUtc,
+            int      days)
+        {
+            var windowStart = startUtc.Date;
+            var windowEnd   = windowStart.AddDays(days);
 
-        var numMatch = Regex.Match(frequency, @"(\d+)");
-        if (!numMatch.Success) return 0;
+            var reminders = await _db.Reminders
+                .Where(r => r.PatientId == patientId && r.Repeat)
+                .ToListAsync();
 
-        var n = int.Parse(numMatch.Groups[1].Value);
+            if (reminders.Count == 0)
+                return new List<ReminderDoseWindowDto>();
 
-        if (frequency.Contains("hour"))
-            return n * 60;
+            var reminderIds = reminders.Select(r => r.Id).ToList();
+            var takens = await _db.DoseTakens
+                .Where(d => reminderIds.Contains(d.ReminderId) &&
+                            d.ScheduledTimeUtc >= windowStart &&
+                            d.ScheduledTimeUtc <  windowEnd)
+                .ToListAsync();
 
-        // default = n times per day
-        return n == 0 ? 0 : (24 * 60 / n);
+            var takenSet = new HashSet<(int rid, DateTime t)>(
+                takens.Select(d => (d.ReminderId, d.ScheduledTimeUtc)));
+
+            var result = new List<ReminderDoseWindowDto>();
+
+            foreach (var r in reminders)
+            {
+                if (!int.TryParse(r.Dosage, out var totalDoses) || totalDoses <= 0)
+                    continue;
+
+                var interval = GetIntervalMinutes(r.Frequency);
+                if (interval <= 0) continue;
+
+                for (var i = 0; i < totalDoses; i++)
+                {
+                    var t = r.CreatedAt.AddMinutes(interval * i);
+                    if (t < windowStart || t >= windowEnd) continue;
+
+                    result.Add(new ReminderDoseWindowDto(
+                        r.Id,
+                        r.MedicationName,
+                        r.Dosage,
+                        r.Notes ?? string.Empty,
+                        t,
+                        takenSet.Contains((r.Id, t))
+                    ));
+                }
+            }
+
+            return result.OrderBy(d => d.ScheduledUtc).ToList();
+        }
+
+        /* ────────────────────────────────────────────────────────────
+           PARSE FREQUENCY → MINUTES
+        ──────────────────────────────────────────────────────────── */
+        private static int GetIntervalMinutes(string frequency)
+        {
+            if (string.IsNullOrWhiteSpace(frequency)) return 0;
+            frequency = frequency.ToLowerInvariant().Trim();
+
+            // e.g. "every 8 hours", "8h", "8 hr"
+            var hourMatch = Regex.Match(frequency, @"(\d+)\s*(hour|hr|h)");
+            if (hourMatch.Success)                     // ← FIX
+            {
+                int n = int.Parse(hourMatch.Groups[1].Value);
+                return n * 60;
+            }
+
+            // "once daily"
+            if (frequency.Contains("once"))
+                return 24 * 60;
+
+            // If it's JUST a number → interpret as hours  ← FIX
+            if (Regex.IsMatch(frequency, @"^\d+$"))
+            {
+                int n = int.Parse(frequency);
+                return n * 60;
+            }
+
+            // legacy: "4 times per day", "4/day"
+            var perDay = Regex.Match(frequency, @"(\d+)\s*(x|/)");
+            if (perDay.Success)
+            {
+                int n = int.Parse(perDay.Groups[1].Value);
+                return n == 0 ? 0 : (24 * 60 / n);
+            }
+
+            return 0; // unsupported format
+        }
     }
 }
