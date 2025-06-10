@@ -23,6 +23,9 @@ namespace healthmate_backend.DTOs
         // Add Doctor's speciality
         public string Speciality { get; set; }
         
+        // Add rating information
+        public bool IsRated { get; set; }
+        public int? Rating { get; set; }
     }
 
     public class PatientBasicDTO

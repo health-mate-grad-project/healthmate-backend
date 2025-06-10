@@ -82,7 +82,9 @@ namespace healthmate_backend.Services
                         PatientName = a.Patient.Username,
                         DoctorId = a.DoctorId,
                         PatientId = a.PatientId,
-                        Speciality = a.Doctor.Speciality // Include Doctor's speciality
+                        Speciality = a.Doctor.Speciality, // Include Doctor's speciality
+                        IsRated = a.IsRated,
+                        Rating = a.Rating
                     })
                     .ToListAsync();
             }
@@ -104,13 +106,90 @@ namespace healthmate_backend.Services
                         PatientName = a.Patient.Username,
                         DoctorId = a.DoctorId,
                         PatientId = a.PatientId,
-                        Speciality = a.Doctor.Speciality // Include Doctor's speciality
+                        Speciality = a.Doctor.Speciality, // Include Doctor's speciality
+                        IsRated = a.IsRated,
+                        Rating = a.Rating
                     })
                     .ToListAsync();
             }
 
-            return appointments;
+            return appointments ?? new List<AppointmentDTO>();
         }
+
+        public async Task<List<AppointmentDTO>> GetPastAppointmentsForPatientAsync(int patientId)
+        {
+            var currentDate = DateTime.UtcNow.Date;
+            
+            var appointments = await _context.Appointments
+                .Where(a => a.PatientId == patientId && 
+                           (a.Date < currentDate || a.Status == "Completed" || a.Status == "Cancelled"))
+                .Include(a => a.Doctor)
+                .Include(a => a.Patient)
+                .OrderByDescending(a => a.Date)
+                .ThenByDescending(a => a.Time)
+                .Select(a => new AppointmentDTO
+                {
+                    AppointmentId = a.Id,
+                    AppointmentType = a.AppointmentType,
+                    Date = a.Date,
+                    Status = a.Status,
+                    Time = a.Time,
+                    Content = a.Content,
+                    DoctorName = a.Doctor.Username,
+                    PatientName = a.Patient.Username,
+                    DoctorId = a.DoctorId,
+                    PatientId = a.PatientId,
+                    Speciality = a.Doctor.Speciality,
+                    IsRated = a.IsRated,
+                    Rating = a.Rating
+                })
+                .ToListAsync();
+
+            return appointments ?? new List<AppointmentDTO>();
+        }
+
+        public async Task<bool> RateAppointmentAsync(int appointmentId, int patientId, int rating)
+        {
+            // Validate rating range
+            if (rating < 1 || rating > 5)
+                return false;
+
+            var appointment = await _context.Appointments
+                .Include(a => a.Doctor)
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.PatientId == patientId);
+
+            if (appointment == null)
+                return false;
+
+            // Check if appointment is past or completed
+            var currentDate = DateTime.UtcNow.Date;
+            if (appointment.Date > currentDate && appointment.Status != "Completed")
+                return false;
+
+            // Check if already rated
+            if (appointment.IsRated)
+                return false;
+
+            // Update appointment rating
+            appointment.Rating = rating;
+            appointment.IsRated = true;
+
+            // Update doctor's average rating
+            var doctor = appointment.Doctor;
+            var doctorAppointments = await _context.Appointments
+                .Where(a => a.DoctorId == doctor.Id && a.IsRated && a.Rating.HasValue)
+                .ToListAsync();
+
+            if (doctorAppointments.Any())
+            {
+                doctor.AverageRating = doctorAppointments.Average(a => a.Rating!.Value);
+                doctor.TotalRatings = doctorAppointments.Count;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> CancelAppointmentAsync(int appointmentId, int patientId)
         {
             var appointment = await _context.Appointments

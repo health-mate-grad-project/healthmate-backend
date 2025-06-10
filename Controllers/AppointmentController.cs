@@ -89,6 +89,50 @@ namespace healthmate_backend.Controllers
         }
 
         [Authorize(Roles = "patient")]
+        [HttpGet("past-appointments")]
+        public async Task<IActionResult> GetPastAppointments()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var patientId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            var appointments = await _appointmentService.GetPastAppointmentsForPatientAsync(patientId);
+
+            if (appointments == null || !appointments.Any())
+            {
+                return NotFound(new { message = "No past appointments found" });
+            }
+
+            return Ok(appointments);
+        }
+
+        [Authorize(Roles = "patient")]
+        [HttpPost("rate-appointment")]
+        public async Task<IActionResult> RateAppointment([FromBody] RateAppointmentRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(userIdClaim.Value, out var patientId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            // Validate rating
+            if (request.Rating < 1 || request.Rating > 5)
+                return BadRequest(new { message = "Rating must be between 1 and 5" });
+
+            var success = await _appointmentService.RateAppointmentAsync(request.AppointmentId, patientId, request.Rating);
+
+            if (!success)
+                return BadRequest(new { message = "Unable to rate appointment. Make sure it's a past appointment and not already rated." });
+
+            return Ok(new { message = "Appointment rated successfully" });
+        }
+
+        [Authorize(Roles = "patient")]
         [HttpPost("cancel-appointment/{appointmentId}")]
         public async Task<IActionResult> CancelAppointment(int appointmentId)
         {

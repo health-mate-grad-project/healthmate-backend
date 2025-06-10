@@ -94,7 +94,7 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
-        public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
+        public async Task<DoctorDto?> GetDoctorDetailsByIdAsync(int doctorId)
         {
             var doctor = await _context.Doctors
                 .Include(d => d.Clinics)
@@ -171,7 +171,7 @@ namespace healthmate_backend.Services
             return true;
         }
         
-        public async Task<Doctor> GetDoctorByIdAsync(int doctorId)
+        public async Task<Doctor?> GetDoctorByIdAsync(int doctorId)
         {
             return await _context.Doctors.FindAsync(doctorId);
         }
@@ -191,7 +191,10 @@ namespace healthmate_backend.Services
         }
 public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doctorId)
 {
-    var patient = await _context.Patients.FindAsync(request.PatientId);
+    if (!request.PatientId.HasValue)
+        return false;
+        
+    var patient = await _context.Patients.FindAsync(request.PatientId.Value);
     if (patient == null)
         return false;
 
@@ -203,7 +206,7 @@ public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doct
         Notes              = request.Notes,
         Repeat             = request.Repeat,
         CreatedAt          = DateTime.UtcNow,
-        PatientId          = (int)request.PatientId,
+        PatientId          = request.PatientId.Value,
         Patient            = patient,
         CreatedByDoctorId  = doctorId,
 		DoctorId			=doctorId

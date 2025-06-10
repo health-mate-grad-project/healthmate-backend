@@ -13,6 +13,19 @@ namespace healthmate_backend.Models.DTOs
         
         // Include only necessary patient information
         public PatientBasicDTO Patient { get; set; }
+        public int AppointmentId { get; set; }
+        public string DoctorName { get; set; }
+        public string PatientName { get; set; }
+        
+        // Add DoctorId and PatientId
+        public int DoctorId { get; set; }
+        public int PatientId { get; set; }
+        // Add Doctor's speciality
+        public string Speciality { get; set; }
+        
+        // Add rating information
+        public bool IsRated { get; set; }
+        public int? Rating { get; set; }
     }
 
     public class PatientBasicDTO
