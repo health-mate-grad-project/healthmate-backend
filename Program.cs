@@ -29,6 +29,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add AuthenticationService
 builder.Services.AddScoped<AuthenticationService>();
 
+// add Reminder Service 
+builder.Services.AddScoped<ReminderService>();
+builder.Services.AddHttpContextAccessor();
+
 // Add IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
