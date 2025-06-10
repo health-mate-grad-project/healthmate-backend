@@ -198,7 +198,7 @@ namespace healthmate_backend.Services
             if (appointment == null)
                 return false;
 
-            if (appointment.Status != "Pending" && appointment.Status != "Scheduled")
+            if (appointment.Status != "Pending" && appointment.Status != "Scheduled" && appointment.Status != "Rescheduled")
                 return false;
 
             appointment.Status = "Cancelled";

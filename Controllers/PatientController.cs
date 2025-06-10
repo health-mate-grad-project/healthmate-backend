@@ -233,6 +233,7 @@ public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
         .Where(d => d.Clinics.Any(c => c.Location.Contains(city)))
         .Select(d => new DoctorSearchResponse
         {
+            DoctorId = d.Id, 
             DoctorName = d.Username,
             Speciality = d.Speciality,
             AverageRating = d.AverageRating,
