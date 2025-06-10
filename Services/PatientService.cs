@@ -27,14 +27,15 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
-		public async Task<List<Doctor>> SearchDoctorsAsync(string query)
-		{	
-    		return await _context.Doctors
-        		.Where(d => d.Username.Contains(query) || d.Speciality.Contains(query))
-        		.ToListAsync();
-		}
 
-        
+        public async Task<List<Doctor>> SearchDoctorsAsync(string query)
+        {
+            return await _context.Doctors
+                .Where(d => d.Username.Contains(query) || d.Speciality.Contains(query))
+                .ToListAsync();
+        }
+
+
         public async Task<bool> UpdateProfileAsync(int id, UpdateProfileRequest request)
         {
             // Fetch the user and patient entities from the database
@@ -49,13 +50,13 @@ namespace healthmate_backend.Services
             }
 
             // Update user information (e.g., name, email) in the Users table
-            if (!string.IsNullOrEmpty(request.Name)) 
+            if (!string.IsNullOrEmpty(request.Name))
             {
                 user.Username = request.Name;
                 Console.WriteLine($"Updated Name: {request.Name}");
             }
 
-            if (!string.IsNullOrEmpty(request.Email)) 
+            if (!string.IsNullOrEmpty(request.Email))
             {
                 user.Email = request.Email;
                 Console.WriteLine($"Updated Email: {request.Email}");
@@ -73,42 +74,49 @@ namespace healthmate_backend.Services
                 patient.Weight = request.Weight.Value;
                 Console.WriteLine($"Updated Weight: {request.Weight.Value}");
             }
+
             if (request.Height.HasValue)
             {
                 patient.Height = request.Height.Value;
                 Console.WriteLine($"Updated Height: {request.Height.Value}");
             }
+
             // Save changes to the database
             await _context.SaveChangesAsync();
             return true;
         }
-public async Task<bool> AddReminderAsync(CreateReminderRequest request, int patientId)
-{
-    var patient = await _context.Patients.FindAsync(patientId);
-    if (patient == null)
-        return false;
 
-    var reminder = new Reminder
-    {
-        MedicationName = request.MedicationName,
-        Dosage = request.Dosage,
-        Frequency = request.Frequency,
-        Notes = request.Notes,
-        Repeat = request.Repeat,
-        CreatedAt = DateTime.UtcNow,
-        PatientId = patientId,
-        Patient = patient,
-        CreatedByPatientId = patientId,
-        CreatedByPatient = patient
-    };
+        public async Task<bool> AddReminderAsync(CreateReminderRequest request, int patientId)
+        {
+            var patient = await _context.Patients.FindAsync(patientId);
+            if (patient == null)
+                return false;
 
-    _context.Reminders.Add(reminder);
-    await _context.SaveChangesAsync();
-    return true;
-}
+            var reminder = new Reminder
+            {
+                MedicationName = request.MedicationName,
+                Dosage = request.Dosage,
+                Frequency = request.Frequency,
+                Notes = request.Notes,
+                Repeat = request.Repeat,
+                CreatedAt = DateTime.UtcNow,
+                PatientId = patientId,
+                Patient = patient,
+                CreatedByPatientId = patientId,
+                CreatedByPatient = patient
+            };
 
-
+            _context.Reminders.Add(reminder);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        
 
     }
+
     
 }
+
+
+
+

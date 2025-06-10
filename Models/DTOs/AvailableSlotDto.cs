@@ -11,4 +11,5 @@ public class AvailableSlotDto
 
     // Optionally, include DoctorDto if you want to include more doctor details
     public DoctorDto Doctor { get; set; }
+
 }

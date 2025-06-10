@@ -19,6 +19,17 @@ namespace healthmate_backend.Controllers
             _doctorService = doctorService;
 			
         }
+		
+		 [HttpGet("{doctorId}")]
+    		public async Task<IActionResult> GetDoctorDetails(int doctorId)
+   			 {
+				var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
+        			if (doctor == null)
+           				 return NotFound();  // returns 404
+
+        		return Ok(doctor);
+   			 }
+
         [Authorize(Roles = "Doctor")]
         [HttpGet("pending-appointments")]
         public async Task<IActionResult> GetPendingAppointments()
@@ -37,6 +48,8 @@ namespace healthmate_backend.Controllers
 
             return Ok(pendingAppointments);  // Return the list of simplified AppointmentDTOs
         }
+
+
 
 
         [Authorize(Roles = "Doctor")]
@@ -92,7 +105,8 @@ namespace healthmate_backend.Controllers
 
             return Ok(patients);
         }
-        [Authorize(Roles = "Doctor")]
+
+
         [HttpGet("doctor-details")]
         public async Task<IActionResult> GetDoctorDetails()
         {

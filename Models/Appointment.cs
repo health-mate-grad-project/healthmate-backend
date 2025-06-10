@@ -18,5 +18,9 @@ namespace healthmate_backend.Models
 
         public int DoctorId { get; set; }
         public required Doctor Doctor { get; set; }
+        
+        public int? AvailableSlotId { get; set; }
+        public AvailableSlot AvailableSlot { get; set; }
+
     }
 }

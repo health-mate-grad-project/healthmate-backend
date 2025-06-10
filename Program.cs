@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFlutterWeb", policy =>
     {
-        policy.WithOrigins("http://localhost:51096") // Flutter web port
+        policy.WithOrigins("http://localhost:64138") // Flutter web port
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

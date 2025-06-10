@@ -94,11 +94,11 @@ namespace healthmate_backend.Services
         }) // Remove duplicate patients who had multiple appointments
         .ToListAsync();
 }
-       public async Task<DoctorDto> GetDoctorDetailsByIdAsync(int doctorId)
-{
-    var doctor = await _context.Doctors
-        .Include(d => d.Clinics)
-        .FirstOrDefaultAsync(d => d.Id == doctorId);
+        public async Task<DoctorDto?> GetDoctorDetailsByIdAsync(int doctorId)
+        {
+            var doctor = await _context.Doctors
+                .Include(d => d.Clinics)
+                .FirstOrDefaultAsync(d => d.Id == doctorId);
 
     if (doctor == null)
         return null;
@@ -178,7 +178,7 @@ namespace healthmate_backend.Services
             return true;
         }
         
-        public async Task<Doctor> GetDoctorByIdAsync(int doctorId)
+        public async Task<Doctor?> GetDoctorByIdAsync(int doctorId)
         {
             return await _context.Doctors.FindAsync(doctorId);
         }
