@@ -202,9 +202,18 @@ namespace healthmate_backend.Services
                 return false;
 
             appointment.Status = "Cancelled";
+
+            // Mark slot as available again
+            var slot = await _context.AvailableSlots.FirstOrDefaultAsync(s => s.Id == appointment.AvailableSlotId);
+            if (slot != null)
+            {
+                slot.IsBooked = false;
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
+
         
         public async Task<bool> RescheduleAppointmentAsync(int patientId, RescheduleAppointmentRequest req)
         {
