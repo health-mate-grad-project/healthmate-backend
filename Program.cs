@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using dotenv.net;
+DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +42,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                 errorNumbersToAdd: null)
     );
 });
+builder.Services.AddScoped<ImageService>();
 
 // Add AuthenticationService
 builder.Services.AddScoped<AuthenticationService>();

@@ -26,6 +26,7 @@ namespace healthmate_backend.Controllers
 
         }
 
+
         [Authorize(Roles = "patient")]
         [HttpPut("complete-profile")]
         public async Task<IActionResult> CompleteProfile([FromBody] PatientCompleteProfileRequest request)

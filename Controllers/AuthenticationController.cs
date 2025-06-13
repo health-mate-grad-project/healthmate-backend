@@ -15,6 +15,7 @@ namespace healthmate_backend.Controllers
             _authService = authService;
         }
 
+        
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
