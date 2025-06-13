@@ -215,38 +215,48 @@ namespace healthmate_backend.Services
         }
 
         
-        public async Task<bool> RescheduleAppointmentAsync(int patientId, RescheduleAppointmentRequest req)
+        public async Task<(bool Success, string Reason)> RescheduleAppointmentAsync(int patientId, RescheduleAppointmentRequest req)
         {
             var appt = await _context.Appointments
                 .FirstOrDefaultAsync(a => a.Id == req.AppointmentId && a.PatientId == patientId);
 
-            if (appt == null ||
-                (appt.Status != "Pending" && appt.Status != "Scheduled"))
-                return false;
+            if (appt == null)
+                return (false, "Appointment not found.");
+
+            if (appt.Status != "Pending" && appt.Status != "Scheduled")
+                return (false, "Only pending or scheduled appointments can be rescheduled.");
 
             var slot = await _context.AvailableSlots
                 .Include(s => s.Doctor)
                 .FirstOrDefaultAsync(s => s.Id == req.NewSlotId);
 
-            if (slot == null || slot.IsBooked || slot.DoctorId != appt.DoctorId)
-                return false;
+            if (slot == null)
+                return (false, "Selected time slot not found.");
 
+            if (slot.IsBooked)
+                return (false, "The selected slot is already booked.");
+
+            if (slot.DoctorId != appt.DoctorId)
+                return (false, "Slot does not belong to the same doctor.");
+
+            // Release old slot
             var oldSlot = await _context.AvailableSlots
                 .FirstOrDefaultAsync(s => s.Id == appt.AvailableSlotId);
             if (oldSlot != null) oldSlot.IsBooked = false;
 
+            // Update appointment
             appt.Date = slot.Date.Date;
             appt.Time = slot.StartTime;
             appt.AvailableSlotId = slot.Id;
-            appt.Status = "Rescheduled";
-
+            appt.Status = "Pending";
             slot.IsBooked = true;
 
             await _context.SaveChangesAsync();
-            return true;
+            return (true, "Appointment rescheduled successfully.");
         }
+
         
-        public async Task<bool> BookAppointmentAsync(int patientId, BookingAppointmentRequest req)
+        public async Task<(bool success, string reason)> BookAppointmentAsync(int patientId, BookingAppointmentRequest req)
         {
             // Check slot availability and doctor
             var slot = await _context.AvailableSlots
@@ -257,7 +267,7 @@ namespace healthmate_backend.Services
             {
                 // _logger.LogWarning("Slot invalid or already booked. SlotId: {SlotId}, IsBooked: {IsBooked}", req.AvailableSlotId, slot?.IsBooked);
 
-                return false;
+                return (false, "Slot is already booked or invalid.");
             }
 
             // Check if patient already has an appointment at the same date/time (and not cancelled or past)
@@ -265,16 +275,16 @@ namespace healthmate_backend.Services
                 .AnyAsync(a => a.PatientId == patientId &&
                                a.Date == slot.Date.Date &&
                                a.Time == slot.StartTime &&
-                               a.Status != "Cancelled" && a.Status != "Past");
+                               a.Status != "Cancelled" && a.Status != "Completed");
 
             if (hasConflict)
-                return false;
+                return (false, "You already have an appointment at this time.");
 
             var patient = await _context.Patients.FindAsync(patientId);
             var doctor = await _context.Doctors.FindAsync(req.DoctorId);
             
             if (patient == null || doctor == null)
-                return false;
+                return (false, "Invalid patient or doctor information.");
             
             // Create the appointment entity with your model's required fields
             var appointment = new Appointment
@@ -298,7 +308,7 @@ namespace healthmate_backend.Services
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
 
-            return true;
+            return (true, "Appointment booked successfully.");
         }
 
         
