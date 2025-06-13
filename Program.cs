@@ -6,25 +6,40 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add logging configuration
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFlutterWeb", policy =>
     {
-        policy.WithOrigins("http://localhost:64138") // Flutter web port
+        policy.WithOrigins("http://localhost:64138", "http://localhost:5181") // Added localhost:5181
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 // Your MySQL connection string
-var connectionString = "server=mysql-2dbc541a-healthmate.k.aivencloud.com;port=15855;database=defaultdb;user=avnadmin;password=AVNS_lhFXyGW3wGvurVtSCVi;SslMode=Required;";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+    "server=mysql-2dbc541a-healthmate.k.aivencloud.com;port=15855;database=defaultdb;user=avnadmin;password=AVNS_lhFXyGW3wGvurVtSCVi;SslMode=Required;";
 
-// Add DbContext
+// Add DbContext with retry policy
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseMySql(
         connectionString,
-        new MySqlServerVersion(new Version(8, 0, 35))
-    )
-);
+        new MySqlServerVersion(new Version(8, 0, 35)),
+        mySqlOptions => mySqlOptions
+            .EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorNumbersToAdd: null)
+    );
+});
 
 // Add AuthenticationService
 builder.Services.AddScoped<AuthenticationService>();
@@ -68,11 +83,16 @@ builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<DoctorHomeScreenService>();
 builder.Services.AddScoped<GeoLocationService>();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<OtpService>();
 
 var app = builder.Build();
+
+// Comment out or remove this line during development
+// app.UseHttpsRedirection();
+
 app.UseCors("AllowFlutterWeb");
 // Middleware
-app.UseHttpsRedirection();
 app.UseAuthentication();  // 🔥 Add before Authorization
 app.UseAuthorization();
 
