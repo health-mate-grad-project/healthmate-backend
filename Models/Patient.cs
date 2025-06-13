@@ -7,7 +7,6 @@ public class Patient : User
     public required string BloodType { get; set; }
     public DateTime Birthdate { get; set; }
     public required string Location { get; set; } 
-public string medicalHistory {get; set;}
 
     public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
