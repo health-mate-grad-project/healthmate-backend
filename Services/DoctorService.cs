@@ -138,8 +138,9 @@ namespace healthmate_backend.Services
                     {
                         Id = a.Patient.Id,
                         Username = a.Patient.Username,
-                        
-                    }
+                        ProfileImageUrl = a.Patient.ProfileImageUrl
+                    },
+                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
                 })
                 .ToListAsync();
 

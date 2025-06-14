@@ -84,7 +84,8 @@ namespace healthmate_backend.Services
                         PatientId = a.PatientId,
                         Speciality = a.Doctor.Speciality, // Include Doctor's speciality
                         IsRated = a.IsRated,
-                        Rating = a.Rating
+                        Rating = a.Rating,
+                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
                     })
                     .ToListAsync();
             }
@@ -108,7 +109,8 @@ namespace healthmate_backend.Services
                         PatientId = a.PatientId,
                         Speciality = a.Doctor.Speciality, // Include Doctor's speciality
                         IsRated = a.IsRated,
-                        Rating = a.Rating
+                        Rating = a.Rating,
+                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
                     })
                     .ToListAsync();
             }
@@ -141,7 +143,8 @@ namespace healthmate_backend.Services
                     PatientId = a.PatientId,
                     Speciality = a.Doctor.Speciality,
                     IsRated = a.IsRated,
-                    Rating = a.Rating
+                    Rating = a.Rating,
+                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
                 })
                 .ToListAsync();
 

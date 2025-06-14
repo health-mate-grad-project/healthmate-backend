@@ -73,7 +73,8 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             AverageRating = d.Doctor.AverageRating,
             TotalRatings = d.Doctor.TotalRatings,
             // Calculate the number of filled stars (max 5 stars)
-            FilledStars = (int)Math.Round(d.Doctor.AverageRating)
+            FilledStars = (int)Math.Round(d.Doctor.AverageRating),
+            ProfileImageUrl = d.Doctor.ProfileImageUrl // Add profile image URL
         });
 
     var doctors = await doctorsQuery.ToListAsync();
@@ -242,6 +243,7 @@ public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
             Speciality = d.Speciality,
             AverageRating = d.AverageRating,
             FilledStars = (int)Math.Round(d.AverageRating),
+            ProfileImageUrl = d.ProfileImageUrl, // Add profile image URL
             Clinics = d.Clinics
                 .Where(c => c.Location.Contains(city))
                 .Select(c => new ClinicDto

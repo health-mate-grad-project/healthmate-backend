@@ -10,5 +10,5 @@ public class DoctorSearchResponse
     public int TotalRatings { get; set; }
     public int FilledStars { get; set; }
     public List<ClinicDto>? Clinics { get; set; } // <-- add this
-
+    public string? ProfileImageUrl { get; set; } // Add profile image URL
 }

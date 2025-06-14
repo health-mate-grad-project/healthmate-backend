@@ -107,6 +107,7 @@ namespace healthmate_backend.Controllers
         }
 
 
+        [Authorize(Roles = "Doctor")]
         [HttpGet("doctor-details")]
         public async Task<IActionResult> GetDoctorDetails()
         {
@@ -179,7 +180,8 @@ namespace healthmate_backend.Controllers
                     Id = doctor.Id,
                     Username = doctor.Username,
                     Email = doctor.Email,
-                    Speciality = doctor.Speciality
+                    Speciality = doctor.Speciality,
+                    ProfileImageUrl = doctor.ProfileImageUrl // Include doctor's profile image URL
                 }
             }).ToList();
 
@@ -225,6 +227,7 @@ namespace healthmate_backend.Controllers
                     Email = doctor.Email,
                     Speciality = doctor.Speciality,
                     License = doctor.License,
+                    ProfileImageUrl = doctor.ProfileImageUrl // Include doctor's profile image URL
                 }
             }).ToList();
 

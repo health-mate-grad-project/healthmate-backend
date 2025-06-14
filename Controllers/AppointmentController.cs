@@ -217,7 +217,7 @@ public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppo
                     ExperienceYear = doctor.ExperienceYear,
                     AverageRating = doctor.AverageRating,
                     TotalRatings = doctor.TotalRatings,
-                    // Location = location 
+                    ProfileImageUrl = doctor.ProfileImageUrl
                 }
             }).ToList();
 

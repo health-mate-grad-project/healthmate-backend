@@ -26,6 +26,9 @@ namespace healthmate_backend.Models.DTOs
         // Add rating information
         public bool IsRated { get; set; }
         public int? Rating { get; set; }
+        
+        // Add doctor's profile image URL
+        public string? DoctorProfileImageUrl { get; set; }
     }
 
     public class PatientBasicDTO
@@ -33,5 +36,6 @@ namespace healthmate_backend.Models.DTOs
         public int Id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
+        public string? ProfileImageUrl { get; set; }
     }
 }

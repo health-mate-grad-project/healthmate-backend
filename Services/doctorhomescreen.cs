@@ -37,8 +37,10 @@ namespace healthmate_backend.Services
                     {
                         Id = a.Patient.Id,
                         Username = a.Patient.Username,
-                        Email = a.Patient.Email
-                    }
+                        Email = a.Patient.Email,
+                        ProfileImageUrl = a.Patient.ProfileImageUrl
+                    },
+                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl
                 })
                 .ToListAsync();
 
