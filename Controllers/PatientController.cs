@@ -138,7 +138,8 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
                 BloodType = patient.BloodType,
                 Height = patient.Height,
                 Weight = patient.Weight,
-                Location = patient.Location
+                Location = patient.Location,
+                ProfileImageUrl = patient.ProfileImageUrl  // Add profile image URL
             };
 
             return Ok(patientDTO);
@@ -174,8 +175,9 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
             {
                 Username = user.Username,  // Get the Username from the Users table
                 Password = user.Password,   // Get the Password (note: this is usually hashed in a real-world scenario)
-                Type = user.Type   // Get type
-
+                Type = user.Type,   // Get type
+                Email = user.Email,  // Get the email
+                ProfileImageUrl = user.ProfileImageUrl  // Get the profile image URL
             };
 
             return Ok(userDTO);

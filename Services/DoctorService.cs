@@ -116,7 +116,8 @@ namespace healthmate_backend.Services
                 ExperienceYear = doctor.ExperienceYear,
                 AverageRating = doctor.AverageRating,
                 TotalRatings = doctor.TotalRatings,
-                Location = location  // Assign location from the clinic
+                Location = location,  // Assign location from the clinic
+                ProfileImageUrl = doctor.ProfileImageUrl  // Add profile image URL
             };
         }
 

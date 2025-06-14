@@ -11,7 +11,7 @@
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
     	public string Location { get; set; }
-
+        public string? ProfileImageUrl { get; set; }
     }
 
 }

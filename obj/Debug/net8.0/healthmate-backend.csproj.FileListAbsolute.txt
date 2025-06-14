@@ -778,3 +778,6 @@ C:\Users\LENOVO\OneDrive\Desktop\Grad_Project\healthmate backend\obj\Debug\net8.
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\CloudinaryDotNet.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\dotenv.net.dll
 G:\Graduation Project\healthmate-backend\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\LENOVO\OneDrive\Desktop\Grad_Project\healthmate backend\bin\Debug\net8.0\CloudinaryDotNet.dll
+C:\Users\LENOVO\OneDrive\Desktop\Grad_Project\healthmate backend\bin\Debug\net8.0\dotenv.net.dll
+C:\Users\LENOVO\OneDrive\Desktop\Grad_Project\healthmate backend\bin\Debug\net8.0\Newtonsoft.Json.dll

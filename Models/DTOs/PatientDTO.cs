@@ -10,4 +10,5 @@ public class PatientDTO
     public float Height { get; set; }
     public float Weight { get; set; }
     public string Location { get; set; }
+    public string? ProfileImageUrl { get; set; }
 }
