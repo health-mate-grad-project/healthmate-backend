@@ -253,7 +253,37 @@ public async Task<IActionResult> GetNearbyDoctors([FromQuery] string? city)
                 }).ToList()
         }).ToListAsync();
 
+    // Debug logging
+    foreach (var doctor in doctors)
+    {
+        Console.WriteLine($"Doctor {doctor.DoctorName} (ID: {doctor.DoctorId}) - ProfileImageUrl: {doctor.ProfileImageUrl}");
+    }
+
     return Ok(doctors);
+}
+
+[Authorize(Roles = "patient")]
+[HttpGet("test-doctors-profile-images")]
+public async Task<IActionResult> TestDoctorsProfileImages()
+{
+    // Test query to see what's actually in the database
+    var doctorsWithImages = await _context.Doctors
+        .Select(d => new { 
+            DoctorId = d.Id, 
+            DoctorName = d.Username, 
+            ProfileImageUrl = d.ProfileImageUrl,
+            HasProfileImage = !string.IsNullOrEmpty(d.ProfileImageUrl)
+        })
+        .ToListAsync();
+
+    Console.WriteLine("=== DOCTORS PROFILE IMAGES TEST ===");
+    foreach (var doctor in doctorsWithImages)
+    {
+        Console.WriteLine($"Doctor {doctor.DoctorName} (ID: {doctor.DoctorId}) - HasProfileImage: {doctor.HasProfileImage} - ProfileImageUrl: {doctor.ProfileImageUrl}");
+    }
+    Console.WriteLine("=== END TEST ===");
+
+    return Ok(doctorsWithImages);
 }
 
 

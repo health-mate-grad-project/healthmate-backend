@@ -115,6 +115,12 @@ namespace healthmate_backend.Services
                     .ToListAsync();
             }
 
+            // Debug logging
+            foreach (var appointment in appointments)
+            {
+                Console.WriteLine($"Appointment {appointment.AppointmentId} - Doctor: {appointment.DoctorName} (ID: {appointment.DoctorId}) - ProfileImageUrl: {appointment.DoctorProfileImageUrl}");
+            }
+
             return appointments ?? new List<AppointmentDTO>();
         }
 
