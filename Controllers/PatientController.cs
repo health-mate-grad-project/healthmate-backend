@@ -8,6 +8,7 @@ using healthmate_backend.Models.DTOs;
 
 namespace healthmate_backend.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController : ControllerBase
@@ -44,6 +45,44 @@ namespace healthmate_backend.Controllers
 
             return Ok(new { message = "Patient profile completed successfully" });
         }
+
+[HttpGet("{patientId}/fcm-token")]
+public async Task<IActionResult> GetFcmTokenByPatientId(int patientId, [FromHeader(Name = "X-API-KEY")] string apiKey)
+{
+    if (apiKey != "super-secret-key")
+        return Unauthorized(new { message = "Invalid API key" });
+
+    var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == patientId);
+    if (patient == null)
+        return NotFound(new { message = "Patient not found" });
+
+    return Ok(new
+    {
+        patientId = patient.Id,
+        fcmToken = patient.FcmToken
+    });
+}
+
+[Authorize(Roles = "patient")]
+[HttpPut("update-fcm-token")]
+public async Task<IActionResult> UpdateFcmToken([FromBody] FcmTokenUpdateRequest request)
+{
+    var userId = int.Parse(User.FindFirst("UserId").Value);
+
+    var patient = await _context.Patients.FindAsync(userId);
+    if (patient == null)
+        return NotFound(new { message = "Patient not found" });
+
+    patient.FcmToken = request.FcmToken;
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "FCM token updated" });
+}
+
+public class FcmTokenUpdateRequest
+{
+    public string FcmToken { get; set; }
+}
 
         // Search doctors based on doctor name or specialty (not both required)
         [Authorize(Roles = "patient")]
