@@ -46,6 +46,9 @@ builder.Services.AddScoped<ImageService>();
 
 // Add AuthenticationService
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<ReminderPublisher>();
+
+builder.Services.AddHostedService<ReminderScheduler>();
 
 // add Reminder Service 
 builder.Services.AddScoped<ReminderService>();
