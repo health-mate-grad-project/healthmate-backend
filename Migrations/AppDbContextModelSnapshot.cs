@@ -211,6 +211,9 @@ namespace healthmate_backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("LastSentAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("MedicationName")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -305,6 +308,9 @@ namespace healthmate_backend.Migrations
 
                     b.Property<string>("BloodType")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FcmToken")
                         .HasColumnType("longtext");
 
                     b.Property<float>("Height")

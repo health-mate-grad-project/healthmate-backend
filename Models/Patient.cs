@@ -10,5 +10,6 @@ public class Patient : User
 
     public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+public string? FcmToken { get; set; }
 
 }

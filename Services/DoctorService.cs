@@ -195,7 +195,7 @@ public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doct
 {
     if (!request.PatientId.HasValue)
         return false;
-        
+
     var patient = await _context.Patients.FindAsync(request.PatientId.Value);
     if (patient == null)
         return false;
@@ -207,17 +207,20 @@ public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doct
         Frequency          = request.Frequency,
         Notes              = request.Notes,
         Repeat             = request.Repeat,
-        CreatedAt          = DateTime.UtcNow,
+        CreatedAt          = DateTime.UtcNow.AddHours(-1),     // ⏱️ Trigger it now
+        LastSentAt         = DateTime.UtcNow.AddHours(-1),     // ⏱️ Already "sent"
         PatientId          = request.PatientId.Value,
         Patient            = patient,
         CreatedByDoctorId  = doctorId,
-		DoctorId			=doctorId
+        DoctorId           = doctorId
     };
 
     _context.Reminders.Add(reminder);
     await _context.SaveChangesAsync();
+
     return true;
 }
+
 public async Task<bool> UpdateAppointmentStatusAsync(int appointmentId, string status)
 {
     var appointment = await _context.Appointments.FindAsync(appointmentId);
