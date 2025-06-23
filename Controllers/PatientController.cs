@@ -78,6 +78,21 @@ public async Task<IActionResult> UpdateFcmToken([FromBody] FcmTokenUpdateRequest
 
     return Ok(new { message = "FCM token updated" });
 }
+[Authorize(Roles = "patient")]
+[HttpPut("clear-fcm-token")]
+public async Task<IActionResult> ClearFcmToken()
+{
+    var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+    var patient = await _context.Patients.FindAsync(userId);
+    if (patient == null)
+        return NotFound(new { message = "Patient not found" });
+
+    patient.FcmToken = null; // Clear the token
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "FCM token cleared successfully" });
+}
 
 public class FcmTokenUpdateRequest
 {

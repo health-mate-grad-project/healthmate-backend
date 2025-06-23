@@ -15,37 +15,35 @@ namespace healthmate_backend.Services
         }
 
         public async Task<List<AppointmentDTO>> GetUpcomingAppointmentsAsync(int doctorId)
+{
+    var appointments = await _context.Appointments
+        .Include(a => a.Patient)
+        .Where(a => a.DoctorId == doctorId &&
+                    (a.Status == "Scheduled" )) 
+        .OrderBy(a => a.Date)
+        .ThenBy(a => a.Time)
+        .Select(a => new AppointmentDTO
         {
-            var currentDate = DateTime.UtcNow.Date;
-            
-            var appointments = await _context.Appointments
-                .Include(a => a.Patient)
-                .Where(a => a.DoctorId == doctorId &&
-                            a.Status == "Scheduled" 
-                           )
-                .OrderBy(a => a.Date)
-                .ThenBy(a => a.Time)
-                .Select(a => new AppointmentDTO
-                {
-                    Id = a.Id,
-                    AppointmentType = a.AppointmentType,
-                    Date = a.Date,
-                    Status = a.Status,
-                    Time = a.Time,
-                    Content = a.Content,
-                    Patient = new PatientBasicDTO
-                    {
-                        Id = a.Patient.Id,
-                        Username = a.Patient.Username,
-                        Email = a.Patient.Email,
-                        ProfileImageUrl = a.Patient.ProfileImageUrl
-                    },
-                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl
-                })
-                .ToListAsync();
+            Id = a.Id,
+            AppointmentType = a.AppointmentType,
+            Date = a.Date,
+            Status = a.Status,
+            Time = a.Time,
+            Content = a.Content,
+            Patient = new PatientBasicDTO
+            {
+                Id = a.Patient.Id,
+                Username = a.Patient.Username,
+                Email = a.Patient.Email,
+                ProfileImageUrl = a.Patient.ProfileImageUrl
+            },
+            DoctorProfileImageUrl = a.Doctor.ProfileImageUrl
+        })
+        .ToListAsync();
 
-            return appointments;
-        }
+    return appointments;
+}
+
 
         public async Task<PatientDetailsDTO> GetAppointmentPatientDetailsAsync(int appointmentId, int doctorId)
         {

@@ -207,8 +207,8 @@ public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doct
         Frequency          = request.Frequency,
         Notes              = request.Notes,
         Repeat             = request.Repeat,
-        CreatedAt          = DateTime.UtcNow.AddHours(-1),     // ⏱️ Trigger it now
-        LastSentAt         = DateTime.UtcNow.AddHours(-1),     // ⏱️ Already "sent"
+        CreatedAt          = DateTime.UtcNow.AddHours(-1),   
+        LastSentAt         = DateTime.UtcNow.AddHours(-1),     
         PatientId          = request.PatientId.Value,
         Patient            = patient,
         CreatedByDoctorId  = doctorId,
