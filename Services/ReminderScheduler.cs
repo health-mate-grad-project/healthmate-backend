@@ -65,6 +65,15 @@ public class ReminderScheduler : BackgroundService
                 if (frequencyTimeSpan == TimeSpan.Zero)
                     continue;
 
+                var repeatDays = reminder.Repeat;
+                var createdAt = reminder.CreatedAt;
+                var endDate = createdAt.AddDays(repeatDays);
+                if (DateTime.UtcNow > endDate)
+                {
+                    Console.WriteLine($"[Skip] Reminder {reminder.Id} expired after {repeatDays} days.");
+                    continue;
+                }
+
                 var lastSent = reminder.LastSentAt ?? reminder.CreatedAt;
                 if ((now - lastSent) >= frequencyTimeSpan)
                 {
@@ -74,6 +83,16 @@ public class ReminderScheduler : BackgroundService
                 }
             }
 
+            var expiredReminders = reminders
+                .Where(r => now > r.CreatedAt.AddDays(r.Repeat)).ToList();
+
+            foreach (var expired in expiredReminders)
+            {
+                var doses = _context.Doses.Where(d => d.ReminderId == expired.Id);
+                _context.Doses.RemoveRange(doses);
+                _context.Reminders.Remove(expired);
+                Console.WriteLine($"[Cleanup] Deleted expired reminder for {expired.MedicationName}");
+            }
             await _context.SaveChangesAsync();
 
             // Wait 1 minute
