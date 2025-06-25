@@ -12,6 +12,7 @@ namespace healthmate_backend.DTOs
         public float Height { get; set; }
         public float Weight { get; set; }
         public string Location { get; set; }
+        public string? ProfileImageUrl { get; set; }
         public AppointmentDetailsDTO AppointmentDetails { get; set; }
     }
 

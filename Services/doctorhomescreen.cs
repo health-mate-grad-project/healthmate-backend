@@ -64,6 +64,7 @@ namespace healthmate_backend.Services
                 Height = appointment.Patient.Height,
                 Weight = appointment.Patient.Weight,
                 Location = appointment.Patient.Location,
+                ProfileImageUrl = appointment.Patient.ProfileImageUrl,
                 AppointmentDetails = new AppointmentDetailsDTO
                 {
                     Id = appointment.Id,

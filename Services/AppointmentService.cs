@@ -85,7 +85,14 @@ namespace healthmate_backend.Services
                         Speciality = a.Doctor.Speciality, // Include Doctor's speciality
                         IsRated = a.IsRated,
                         Rating = a.Rating,
-                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
+                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl, // Include Doctor's profile image URL
+                        Patient = new PatientBasicDTO
+                        {
+                            Id = a.Patient.Id,
+                            Username = a.Patient.Username,
+                            Email = a.Patient.Email,
+                            ProfileImageUrl = a.Patient.ProfileImageUrl
+                        }
                     })
                     .ToListAsync();
             }
@@ -110,7 +117,14 @@ namespace healthmate_backend.Services
                         Speciality = a.Doctor.Speciality, // Include Doctor's speciality
                         IsRated = a.IsRated,
                         Rating = a.Rating,
-                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
+                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl, // Include Doctor's profile image URL
+                        Patient = new PatientBasicDTO
+                        {
+                            Id = a.Patient.Id,
+                            Username = a.Patient.Username,
+                            Email = a.Patient.Email,
+                            ProfileImageUrl = a.Patient.ProfileImageUrl
+                        }
                     })
                     .ToListAsync();
             }
@@ -150,7 +164,14 @@ namespace healthmate_backend.Services
                     Speciality = a.Doctor.Speciality,
                     IsRated = a.IsRated,
                     Rating = a.Rating,
-                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl // Include Doctor's profile image URL
+                    DoctorProfileImageUrl = a.Doctor.ProfileImageUrl, // Include Doctor's profile image URL
+                    Patient = new PatientBasicDTO
+                    {
+                        Id = a.Patient.Id,
+                        Username = a.Patient.Username,
+                        Email = a.Patient.Email,
+                        ProfileImageUrl = a.Patient.ProfileImageUrl
+                    }
                 })
                 .ToListAsync();
 
