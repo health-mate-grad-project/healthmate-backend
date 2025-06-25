@@ -94,20 +94,59 @@ namespace healthmate_backend.Services
 
             var reminder = new Reminder
             {
-                MedicationName = request.MedicationName,
-                Dosage = request.Dosage,
-                Frequency = request.Frequency,
-                Notes = request.Notes,
-                Repeat = request.Repeat,
-                CreatedAt = DateTime.UtcNow,
-                PatientId = patientId,
-                Patient = patient,
+                MedicationName     = request.MedicationName,
+                Dosage             = request.Dosage,
+                Frequency          = request.Frequency,
+                Notes              = request.Notes,
+                Repeat             = request.Repeat,
+                CreatedAt          = DateTime.UtcNow,
+                PatientId          = patientId,
+                Patient            = patient,
                 CreatedByPatientId = patientId,
-                CreatedByPatient = patient
+                CreatedByPatient   = patient
             };
 
             _context.Reminders.Add(reminder);
             await _context.SaveChangesAsync();
+
+            // Parse frequency like "8h" or "30m"
+            TimeSpan frequencyInterval;
+            string freq = reminder.Frequency?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(freq))
+                return false;
+
+            if (freq.EndsWith("h") && double.TryParse(freq[..^1], out double h))
+            {
+                frequencyInterval = TimeSpan.FromHours(h);
+            }
+            else if (freq.EndsWith("m") && double.TryParse(freq[..^1], out double m))
+            {
+                frequencyInterval = TimeSpan.FromMinutes(m);
+            }
+            else
+            {
+                return false; // Invalid format
+            }
+
+            // Generate doses from start to end
+            var doses = new List<Dose>();
+            DateTime start = reminder.CreatedAt;
+            DateTime end = start.AddDays(reminder.Repeat);
+
+            for (DateTime dt = start; dt < end; dt = dt.Add(frequencyInterval))
+            {
+                doses.Add(new Dose
+                {
+                    ReminderId   = reminder.Id,
+                    ScheduledUtc = dt,
+                    Taken        = false
+                });
+            }
+
+            _context.Doses.AddRange(doses);
+            await _context.SaveChangesAsync();
+
             return true;
         }
         

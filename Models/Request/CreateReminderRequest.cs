@@ -7,6 +7,6 @@
         public string Dosage { get; set; } = null!;
         public string Frequency { get; set; } = null!;
         public string Notes { get; set; } = null!;
-        public bool Repeat { get; set; } = true;
+        public int Repeat { get; set; }
     }
 }

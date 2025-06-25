@@ -24,7 +24,7 @@ namespace healthmate_backend.Services
             var end = midnight.AddDays(1);
 
             var reminders = await _db.Reminders
-                .Where(r => r.PatientId == patientId && r.Repeat)
+                .Where(r => r.PatientId == patientId && r.Repeat > 0)
                 .ToListAsync();
 
             var result = new List<ReminderTodayDto>();
@@ -38,7 +38,7 @@ namespace healthmate_backend.Services
                     .ToListAsync();
 
                 var schedule = doses
-                    .Select(d => new ReminderDoseDto(d.ScheduledUtc, d.Taken))
+                    .Select(d => new ReminderDoseDto(d.Id, d.ScheduledUtc, d.Taken))
                     .OrderBy(d => d.ScheduledUtc)
                     .ToList();
 
@@ -59,7 +59,11 @@ namespace healthmate_backend.Services
                 .Include(d => d.Reminder)
                 .FirstOrDefaultAsync(d => d.Id == doseId && d.Reminder.PatientId == patientId);
 
-            if (dose == null) return false;
+            if (dose == null)
+                return false;
+
+            if (DateTime.UtcNow < dose.ScheduledUtc)
+                return false;
 
             if (!dose.Taken)
             {
@@ -114,14 +118,16 @@ namespace healthmate_backend.Services
                 .ToListAsync();
 
             return doses
-                .Select(d => new ReminderDoseWindowDto(
-                    d.ReminderId,
-                    d.Reminder.MedicationName,
-                    d.Reminder.Dosage,
-                    d.Reminder.Notes ?? string.Empty,
-                    d.ScheduledUtc,
-                    d.Taken
-                ))
+                    .Select(d => new ReminderDoseWindowDto(
+                        d.Id,
+                        d.Reminder.Id,
+                        d.Reminder.MedicationName,
+                        d.Reminder.Dosage,
+                        d.Reminder.Notes,
+                        d.ScheduledUtc,
+                        d.Taken
+                    ))
+
                 .OrderBy(d => d.ScheduledUtc)
                 .ToList();
         }

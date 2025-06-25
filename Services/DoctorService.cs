@@ -191,35 +191,73 @@ namespace healthmate_backend.Services
                 .Where(slot => slot.DoctorId == doctorId )  
                 .ToListAsync();
         }
-public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doctorId)
-{
-    if (!request.PatientId.HasValue)
-        return false;
+        public async Task<bool> AddReminderAsync(CreateReminderRequest request, int doctorId)
+        {
+            if (!request.PatientId.HasValue)
+                return false;
 
-    var patient = await _context.Patients.FindAsync(request.PatientId.Value);
-    if (patient == null)
-        return false;
+            var patient = await _context.Patients.FindAsync(request.PatientId.Value);
+            if (patient == null)
+                return false;
 
-    var reminder = new Reminder
-    {
-        MedicationName     = request.MedicationName,
-        Dosage             = request.Dosage,
-        Frequency          = request.Frequency,
-        Notes              = request.Notes,
-        Repeat             = request.Repeat,
-        CreatedAt          = DateTime.UtcNow.AddHours(-1),   
-        LastSentAt         = DateTime.UtcNow.AddHours(-1),     
-        PatientId          = request.PatientId.Value,
-        Patient            = patient,
-        CreatedByDoctorId  = doctorId,
-        DoctorId           = doctorId
-    };
+            var reminder = new Reminder
+            {
+                MedicationName    = request.MedicationName,
+                Dosage            = request.Dosage,
+                Frequency         = request.Frequency,
+                Notes             = request.Notes,
+                Repeat            = request.Repeat,
+                CreatedAt         = DateTime.UtcNow.AddHours(-1),
+                LastSentAt        = DateTime.UtcNow.AddHours(-1),
+                PatientId         = request.PatientId.Value,
+                Patient           = patient,
+                CreatedByDoctorId = doctorId,
+                DoctorId          = doctorId
+            };
 
-    _context.Reminders.Add(reminder);
-    await _context.SaveChangesAsync();
+            _context.Reminders.Add(reminder);
+            await _context.SaveChangesAsync();
 
-    return true;
-}
+            // Parse frequency like "8h" or "30m"
+            TimeSpan frequencyInterval;
+            var freq = reminder.Frequency?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(freq))
+                return false;
+
+            if (freq.EndsWith("h") && double.TryParse(freq[..^1], out double h))
+            {
+                frequencyInterval = TimeSpan.FromHours(h);
+            }
+            else if (freq.EndsWith("m") && double.TryParse(freq[..^1], out double m))
+            {
+                frequencyInterval = TimeSpan.FromMinutes(m);
+            }
+            else
+            {
+                return false; // Invalid frequency format
+            }
+
+            // Generate doses between [start, end)
+            var doses = new List<Dose>();
+            DateTime start = reminder.CreatedAt;
+            DateTime end = start.AddDays(reminder.Repeat); // repeat = number of days
+
+            for (DateTime dt = start; dt < end; dt = dt.Add(frequencyInterval))
+            {
+                doses.Add(new Dose
+                {
+                    ReminderId   = reminder.Id,
+                    ScheduledUtc = dt,
+                    Taken        = false
+                });
+            }
+
+            _context.Doses.AddRange(doses);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
 
 public async Task<bool> UpdateAppointmentStatusAsync(int appointmentId, string status)
 {

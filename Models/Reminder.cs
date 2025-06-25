@@ -11,7 +11,7 @@ namespace healthmate_backend.Models
         public required string Frequency { get; set; }          // "12 hours"
         public required string Notes { get; set; }              // Optional comments
 
-        public bool Repeat { get; set; } = true;       // default from ERD
+        public int Repeat { get; set; }    // default from ERD
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

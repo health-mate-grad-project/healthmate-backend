@@ -42,16 +42,11 @@ public class ReminderController : ControllerBase
     }
 
     // POST …/reminders/{reminderId}/dose/check?scheduled=2025-06-10T08:00:00Z
-    [HttpPost("{reminderId:int}/dose/check")]
-    public async Task<IActionResult> CheckDose(
-        int patientId,
-        int reminderId,
-        [FromQuery(Name = "doseId")] int doseId  // ✅ use doseId instead of scheduledUtc
-    )
+    [HttpPost("dose/{doseId}/check")]
+    public async Task<IActionResult> MarkDoseTaken(int patientId, int doseId)
     {
-        // ❗ Although reminderId is in the route, we use doseId for lookup
-        var ok = await _svc.MarkDoseTakenAsync(doseId, patientId);  // ✅ pass only doseId and patientId
-        return ok ? Ok() : NotFound();
+        var success = await _svc.MarkDoseTakenAsync(doseId, patientId);
+        return success ? Ok() : NotFound();
     }
 
   
