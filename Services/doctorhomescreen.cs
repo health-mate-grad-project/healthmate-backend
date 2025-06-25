@@ -2,7 +2,6 @@
 using healthmate_backend.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace healthmate_backend.Services
 {
     public class DoctorHomeScreenService
@@ -94,34 +93,34 @@ namespace healthmate_backend.Services
         }
 
         public async Task<AppointmentActionResult> CancelAppointmentAsync(int appointmentId, int doctorId)
-{
-    var appointment = await _context.Appointments
-        .FirstOrDefaultAsync(a => a.Id == appointmentId && a.DoctorId == doctorId);
+        {
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.DoctorId == doctorId);
 
-    if (appointment == null)
-        return new AppointmentActionResult { Success = false, Message = "Appointment not found or unauthorized access" };
+            if (appointment == null)
+                return new AppointmentActionResult { Success = false, Message = "Appointment not found or unauthorized access" };
 
-    if (appointment.Status == "Cancelled")
-        return new AppointmentActionResult { Success = false, Message = "Appointment is already cancelled" };
+            if (appointment.Status == "Cancelled")
+                return new AppointmentActionResult { Success = false, Message = "Appointment is already cancelled" };
 
-    if (appointment.Date.Date < DateTime.UtcNow.Date)
-        return new AppointmentActionResult { Success = false, Message = "Cannot cancel past appointments" };
+            if (appointment.Date.Date < DateTime.UtcNow.Date)
+                return new AppointmentActionResult { Success = false, Message = "Cannot cancel past appointments" };
 
-    // Mark the appointment as cancelled
-    appointment.Status = "Cancelled";
+            // Mark the appointment as cancelled
+            appointment.Status = "Cancelled";
 
-    // Also mark the slot as available
-    var slot = await _context.AvailableSlots.FirstOrDefaultAsync(s => s.Id == appointment.AvailableSlotId);
-    if (slot != null)
-    {
-        slot.IsBooked = false;
+            // Also mark the slot as available
+            var slot = await _context.AvailableSlots.FirstOrDefaultAsync(s => s.Id == appointment.AvailableSlotId);
+            if (slot != null)
+            {
+                slot.IsBooked = false;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new AppointmentActionResult { Success = true, Message = "Appointment cancelled successfully" };
+        }
     }
-
-    await _context.SaveChangesAsync();
-
-    return new AppointmentActionResult { Success = true, Message = "Appointment cancelled successfully" };
-}
-}
 
     public class AppointmentActionResult
     {

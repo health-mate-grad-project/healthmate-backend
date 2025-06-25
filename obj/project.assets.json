@@ -5569,6 +5569,7 @@
       "Microsoft.AspNetCore.Session >= 2.3.0",
       "Microsoft.EntityFrameworkCore >= 8.0.4",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.4",
+      "Microsoft.EntityFrameworkCore.Relational >= 8.0.4",
       "MySql.Data >= 9.3.0",
       "Newtonsoft.Json >= 12.0.3",
       "Pomelo.EntityFrameworkCore.MySql >= 8.0.2",
@@ -5579,23 +5580,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\rawaa\\.nuget\\packages\\": {},
+    "C:\\Users\\user\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj",
+      "projectUniqueName": "C:\\Users\\user\\git\\healthmate-backendd\\healthmate-backend.csproj",
       "projectName": "healthmate-backend",
-      "projectPath": "G:\\Graduation Project\\healthmate-backend\\healthmate-backend.csproj",
-      "packagesPath": "C:\\Users\\rawaa\\.nuget\\packages\\",
-      "outputPath": "G:\\Graduation Project\\healthmate-backend\\obj\\",
+      "projectPath": "C:\\Users\\user\\git\\healthmate-backendd\\healthmate-backend.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\git\\healthmate-backendd\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\rawaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
       ],
       "originalTargetFrameworks": [
@@ -5663,6 +5664,10 @@
             "target": "Package",
             "version": "[8.0.4, )"
           },
+          "Microsoft.EntityFrameworkCore.Relational": {
+            "target": "Package",
+            "version": "[8.0.4, )"
+          },
           "MySql.Data": {
             "target": "Package",
             "version": "[9.3.0, )"
@@ -5711,7 +5716,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   },
