@@ -46,19 +46,14 @@ public class ReminderController : ControllerBase
     public async Task<IActionResult> CheckDose(
         int patientId,
         int reminderId,
-        [FromQuery(Name = "scheduledUtc")] string scheduledUtc     // ← match our Flutter
+        [FromQuery(Name = "doseId")] int doseId  // ✅ use doseId instead of scheduledUtc
     )
     {
-        if (!DateTime.TryParse(
-                scheduledUtc,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal,
-                out var schedUtc))
-            return BadRequest("Invalid scheduledUtc param");
-
-        var ok = await _svc.MarkDoseTakenAsync(reminderId, schedUtc, patientId);
+        // ❗ Although reminderId is in the route, we use doseId for lookup
+        var ok = await _svc.MarkDoseTakenAsync(doseId, patientId);  // ✅ pass only doseId and patientId
         return ok ? Ok() : NotFound();
     }
+
   
     
     // Returns every scheduled dose for today + tomorrow by default.

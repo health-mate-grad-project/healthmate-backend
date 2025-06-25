@@ -18,31 +18,28 @@ namespace healthmate_backend.Services
         /* ────────────────────────────────────────────────────────────
            PUBLIC API
         ──────────────────────────────────────────────────────────── */
-        public async Task<List<ReminderTodayDto>> GetTodayAsync(
-            int patientId, DateTime dayUtc)
+        public async Task<List<ReminderTodayDto>> GetTodayAsync(int patientId, DateTime dayUtc)
         {
-            var midnight = dayUtc;
-            var end      = midnight.AddDays(1);
+            var midnight = dayUtc.Date;
+            var end = midnight.AddDays(1);
 
             var reminders = await _db.Reminders
                 .Where(r => r.PatientId == patientId && r.Repeat)
                 .ToListAsync();
 
             var result = new List<ReminderTodayDto>();
+
             foreach (var r in reminders)
             {
-                var schedule = BuildScheduleForDay(r, midnight, end);
-
-                var takenKeys = await _db.DoseTakens
+                var doses = await _db.Doses
                     .Where(d => d.ReminderId == r.Id &&
-                                d.ScheduledTimeUtc >= midnight &&
-                                d.ScheduledTimeUtc <  end)
-                    .Select(d => d.ScheduledTimeUtc)
+                                d.ScheduledUtc >= midnight &&
+                                d.ScheduledUtc < end)
                     .ToListAsync();
 
-                var dtoSchedule = schedule
-                    .Select(t => new ReminderDoseDto(
-                        t, takenKeys.Contains(t)))
+                var schedule = doses
+                    .Select(d => new ReminderDoseDto(d.ScheduledUtc, d.Taken))
+                    .OrderBy(d => d.ScheduledUtc)
                     .ToList();
 
                 result.Add(new ReminderTodayDto(
@@ -50,29 +47,27 @@ namespace healthmate_backend.Services
                     r.MedicationName,
                     r.Dosage,
                     r.Notes ?? string.Empty,
-                    dtoSchedule));
+                    schedule));
             }
 
             return result;
         }
 
-        public async Task<bool> MarkDoseTakenAsync(
-            int reminderId, DateTime scheduledUtc, int patientId)
+        public async Task<bool> MarkDoseTakenAsync(int doseId, int patientId)
         {
-            var belongs = await _db.Reminders
-                .AnyAsync(r => r.Id == reminderId && r.PatientId == patientId);
-            if (!belongs) return false;
+            var dose = await _db.Doses
+                .Include(d => d.Reminder)
+                .FirstOrDefaultAsync(d => d.Id == doseId && d.Reminder.PatientId == patientId);
 
-            var entry = await _db.DoseTakens.FindAsync(reminderId, scheduledUtc);
-            if (entry != null) return true; // already marked
+            if (dose == null) return false;
 
-            _db.DoseTakens.Add(new DoseTaken
+            if (!dose.Taken)
             {
-                ReminderId       = reminderId,
-                ScheduledTimeUtc = scheduledUtc,
-                TakenTimeUtc     = DateTime.UtcNow
-            });
-            await _db.SaveChangesAsync();
+                dose.Taken = true;
+                dose.TakenTimeUtc = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+            }
+
             return true;
         }
 
@@ -106,59 +101,30 @@ namespace healthmate_backend.Services
            HELPER – “upcoming” window
         ──────────────────────────────────────────────────────────── */
         public async Task<List<ReminderDoseWindowDto>> GetUpcomingAsync(
-            int      patientId,
-            DateTime startUtc,
-            int      days)
+            int patientId, DateTime startUtc, int days)
         {
             var windowStart = startUtc.Date;
-            var windowEnd   = windowStart.AddDays(days);
+            var windowEnd = windowStart.AddDays(days);
 
-            var reminders = await _db.Reminders
-                .Where(r => r.PatientId == patientId && r.Repeat)
+            var doses = await _db.Doses
+                .Include(d => d.Reminder)
+                .Where(d => d.Reminder.PatientId == patientId &&
+                            d.ScheduledUtc >= windowStart &&
+                            d.ScheduledUtc < windowEnd)
                 .ToListAsync();
 
-            if (reminders.Count == 0)
-                return new List<ReminderDoseWindowDto>();
-
-            var reminderIds = reminders.Select(r => r.Id).ToList();
-            var takens = await _db.DoseTakens
-                .Where(d => reminderIds.Contains(d.ReminderId) &&
-                            d.ScheduledTimeUtc >= windowStart &&
-                            d.ScheduledTimeUtc <  windowEnd)
-                .ToListAsync();
-
-            var takenSet = new HashSet<(int rid, DateTime t)>(
-                takens.Select(d => (d.ReminderId, d.ScheduledTimeUtc)));
-
-            var result = new List<ReminderDoseWindowDto>();
-
-            foreach (var r in reminders)
-            {
-                if (!int.TryParse(r.Dosage, out var totalDoses) || totalDoses <= 0)
-                    continue;
-
-                var interval = GetIntervalMinutes(r.Frequency);
-                if (interval <= 0) continue;
-
-                for (var i = 0; i < totalDoses; i++)
-                {
-                    var t = r.CreatedAt.AddMinutes(interval * i);
-                    if (t < windowStart || t >= windowEnd) continue;
-
-                    result.Add(new ReminderDoseWindowDto(
-                        r.Id,
-                        r.MedicationName,
-                        r.Dosage,
-                        r.Notes ?? string.Empty,
-                        t,
-                        takenSet.Contains((r.Id, t))
-                    ));
-                }
-            }
-
-            return result.OrderBy(d => d.ScheduledUtc).ToList();
+            return doses
+                .Select(d => new ReminderDoseWindowDto(
+                    d.ReminderId,
+                    d.Reminder.MedicationName,
+                    d.Reminder.Dosage,
+                    d.Reminder.Notes ?? string.Empty,
+                    d.ScheduledUtc,
+                    d.Taken
+                ))
+                .OrderBy(d => d.ScheduledUtc)
+                .ToList();
         }
-
         /* ────────────────────────────────────────────────────────────
            PARSE FREQUENCY → MINUTES
         ──────────────────────────────────────────────────────────── */

@@ -4,6 +4,8 @@ using healthmate_backend.Models;
 public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<Dose> Doses { get; set; }
+
     public DbSet<Doctor> Doctors { get; set; }
     public DbSet<Patient> Patients { get; set; }
 	public DbSet<AvailableSlot> AvailableSlots { get; set; }
@@ -12,7 +14,6 @@ public class AppDbContext : DbContext
     public DbSet<Reminder> Reminders { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
     
-    public DbSet<DoseTaken> DoseTakens { get; set; }
     public DbSet<OtpVerification> OtpVerifications { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -56,14 +57,8 @@ public class AppDbContext : DbContext
             .HasOne(a => a.Doctor)
             .WithMany(d => d.Appointments)
             .HasForeignKey(a => a.DoctorId);
-        modelBuilder.Entity<DoseTaken>()
-            .HasKey(d => new { d.ReminderId, d.ScheduledTimeUtc });
+       
         
-        modelBuilder.Entity<DoseTaken>()
-            .HasOne(d => d.Reminder)
-            .WithMany()                            // no nav prop needed
-            .HasForeignKey(d => d.ReminderId)
-            .OnDelete(DeleteBehavior.Cascade);
         
         
 modelBuilder.Entity<AvailableSlot>()
