@@ -341,7 +341,60 @@ namespace healthmate_backend.Services
             return (true, "Appointment booked successfully.");
         }
 
-        
+        public async Task<List<AppointmentDTO>> GetUpcomingAppointmentsForPatientAsync(int patientId)
+        {
+            var currentDate = DateTime.UtcNow.Date;
+            var appointments = await _context.Appointments
+                .Where(a => a.PatientId == patientId && (a.Status == "Pending" || a.Status == "Scheduled"))
+                .Include(a => a.Doctor)
+                .Include(a => a.Patient)
+                .ToListAsync();
+
+            // Filter and update status for past appointments
+            var upcomingAppointments = new List<AppointmentDTO>();
+            foreach (var appointment in appointments)
+            {
+                if (appointment.Date < currentDate)
+                {
+                    if (appointment.Status != "Cancelled")
+                    {
+                        appointment.Status = "Cancelled";
+                    }
+                }
+                else
+                {
+                    upcomingAppointments.Add(new AppointmentDTO
+                    {
+                        AppointmentId = appointment.Id,
+                        AppointmentType = appointment.AppointmentType,
+                        Date = appointment.Date,
+                        Status = appointment.Status,
+                        Time = appointment.Time,
+                        Content = appointment.Content,
+                        DoctorName = appointment.Doctor.Username,
+                        PatientName = appointment.Patient.Username,
+                        DoctorId = appointment.DoctorId,
+                        PatientId = appointment.PatientId,
+                        Speciality = appointment.Doctor.Speciality,
+                        IsRated = appointment.IsRated,
+                        Rating = appointment.Rating,
+                        DoctorProfileImageUrl = appointment.Doctor.ProfileImageUrl,
+                        Patient = new PatientBasicDTO
+                        {
+                            Id = appointment.Patient.Id,
+                            Username = appointment.Patient.Username,
+                            Email = appointment.Patient.Email,
+                            ProfileImageUrl = appointment.Patient.ProfileImageUrl
+                        }
+                    });
+                }
+            }
+
+            // Save changes if any status was updated
+            await _context.SaveChangesAsync();
+
+            return upcomingAppointments;
+        }
     }
     
    

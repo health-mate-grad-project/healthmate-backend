@@ -15,34 +15,50 @@ namespace healthmate_backend.Services
         }
 
         public async Task<List<AppointmentDTO>> GetUpcomingAppointmentsAsync(int doctorId)
-{
-    var appointments = await _context.Appointments
-        .Include(a => a.Patient)
-        .Where(a => a.DoctorId == doctorId &&
-                    (a.Status == "Scheduled" )) 
-        .OrderBy(a => a.Date)
-        .ThenBy(a => a.Time)
-        .Select(a => new AppointmentDTO
         {
-            Id = a.Id,
-            AppointmentType = a.AppointmentType,
-            Date = a.Date,
-            Status = a.Status,
-            Time = a.Time,
-            Content = a.Content,
-            Patient = new PatientBasicDTO
-            {
-                Id = a.Patient.Id,
-                Username = a.Patient.Username,
-                Email = a.Patient.Email,
-                ProfileImageUrl = a.Patient.ProfileImageUrl
-            },
-            DoctorProfileImageUrl = a.Doctor.ProfileImageUrl
-        })
-        .ToListAsync();
+            var currentDate = DateTime.UtcNow.Date;
+            var appointments = await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(a => a.DoctorId == doctorId && a.Status == "Scheduled")
+                .ToListAsync();
 
-    return appointments;
-}
+            var upcomingAppointments = new List<AppointmentDTO>();
+            foreach (var appointment in appointments)
+            {
+                if (appointment.Date < currentDate)
+                {
+                    if (appointment.Status != "Cancelled")
+                    {
+                        appointment.Status = "Cancelled";
+                    }
+                }
+                else
+                {
+                    upcomingAppointments.Add(new AppointmentDTO
+                    {
+                        Id = appointment.Id,
+                        AppointmentType = appointment.AppointmentType,
+                        Date = appointment.Date,
+                        Status = appointment.Status,
+                        Time = appointment.Time,
+                        Content = appointment.Content,
+                        Patient = new PatientBasicDTO
+                        {
+                            Id = appointment.Patient.Id,
+                            Username = appointment.Patient.Username,
+                            Email = appointment.Patient.Email,
+                            ProfileImageUrl = appointment.Patient.ProfileImageUrl
+                        },
+                        DoctorProfileImageUrl = appointment.Doctor.ProfileImageUrl
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return upcomingAppointments;
+        }
 
 
         public async Task<PatientDetailsDTO> GetAppointmentPatientDetailsAsync(int appointmentId, int doctorId)
