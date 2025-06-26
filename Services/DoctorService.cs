@@ -118,7 +118,12 @@ namespace healthmate_backend.Services
                 AverageRating = doctor.AverageRating,
                 TotalRatings = doctor.TotalRatings,
                 Location = location,  // Assign location from the clinic
-                ProfileImageUrl = doctor.ProfileImageUrl  // Add profile image URL
+                ProfileImageUrl = doctor.ProfileImageUrl,  // Add profile image URL
+                Clinics = doctor.Clinics.Select(c => new ClinicDto
+                {
+                    Name = c.Name,
+                    Location = c.Location
+                }).ToList()
             };
         }
 
