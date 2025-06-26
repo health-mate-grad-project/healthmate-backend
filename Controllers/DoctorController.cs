@@ -23,7 +23,7 @@ namespace healthmate_backend.Controllers
 		 [HttpGet("{doctorId}")]
     		public async Task<IActionResult> GetDoctorDetails(int doctorId)
    			 {
-				var doctor = await _doctorService.GetDoctorByIdAsync(doctorId);
+				var doctor = await _doctorService.GetDoctorDetailsByIdAsync(doctorId);
         			if (doctor == null)
            				 return NotFound();  // returns 404
 
