@@ -53,6 +53,13 @@ namespace healthmate_backend.Controllers
                 return Ok(logs);
             }
         }
+
+        [HttpGet("user-logs")]
+        public async Task<IActionResult> GetAllUserLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
+            return Ok(logs);
+        }
     }
 
     public class AdminLoginRequest

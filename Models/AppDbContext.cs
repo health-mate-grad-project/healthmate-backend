@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
 
     public DbSet<AdminLog> AdminLogs { get; set; }
 
+    public DbSet<UserLog> UserLogs { get; set; }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
