@@ -63,6 +63,66 @@ namespace healthmate_backend.Controllers
                 .ToListAsync();
             return Ok(new { message = "User login logs", logs });
         }
+
+        [HttpGet("user-logs-logout")]
+        public async Task<IActionResult> GetAllUserLogoutLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "logout")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User logout logs", logs });
+        }
+
+        [HttpGet("user-logs-book")]
+        public async Task<IActionResult> GetAllUserBookLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "book")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User book appointment logs", logs });
+        }
+
+        [HttpGet("user-logs-reschedule")]
+        public async Task<IActionResult> GetAllUserRescheduleLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "reschedule")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User reschedule appointment logs", logs });
+        }
+
+        [HttpGet("user-logs-cancel")]
+        public async Task<IActionResult> GetAllUserCancelLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "cancel")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User cancel appointment logs", logs });
+        }
+
+        [HttpGet("user-logs-start")]
+        public async Task<IActionResult> GetAllUserStartLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "start")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User start appointment logs", logs });
+        }
+
+        [HttpGet("user-logs-reminder")]
+        public async Task<IActionResult> GetAllUserReminderLogs([FromServices] AppDbContext context)
+        {
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "reminder")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User reminder logs", logs });
+        }
     }
 
     public class AdminLoginRequest

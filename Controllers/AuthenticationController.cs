@@ -63,15 +63,26 @@ namespace healthmate_backend.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            int? userId = null;
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var parsedId))
+                userId = parsedId;
             var result = await _authService.LogoutAsync();
+            if (userId != null)
+            {
+                var log = new UserLog
+                {
+                    UserId = userId.Value,
+                    Action = "logout",
+                    Timestamp = DateTime.UtcNow,
+                    Details = $"User {userId.Value} logged out."
+                };
+                _context.UserLogs.Add(log);
+                await _context.SaveChangesAsync();
+            }
             return Ok(new { message = result });
         }
 
-        [HttpGet("user-logs")]
-        public async Task<IActionResult> GetUserLogs()
-        {
-            var logs = await _context.UserLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
-            return Ok(logs);
-        }
+        
     }
 }

@@ -4,7 +4,7 @@ using healthmate_backend.Services;
 using healthmate_backend.Models.Request;
 using healthmate_backend.Models.DTOs;
 using healthmate_backend.Models;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace healthmate_backend.Controllers
 {
@@ -14,11 +14,13 @@ namespace healthmate_backend.Controllers
     {
         private readonly AppointmentService _appointmentService;
         private readonly DoctorService _doctorService;
+        private readonly AppDbContext _context;
 
-        public AppointmentController(AppointmentService appointmentService , DoctorService doctorService)
+        public AppointmentController(AppointmentService appointmentService, DoctorService doctorService, AppDbContext context)
         {
             _appointmentService = appointmentService;
-            _doctorService      = doctorService;
+            _doctorService = doctorService;
+            _context = context;
         }
 
         [Authorize(Roles = "Doctor")]
@@ -147,29 +149,44 @@ namespace healthmate_backend.Controllers
 
             if (!success)
                 return BadRequest(new { message = "Appointment must be in Pending or Scheduled status to cancel" });
-
+            // Log cancel
+            var log = new UserLog
+            {
+                UserId = patientId,
+                Action = "cancel",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {patientId} canceled appointment {appointmentId}."
+            };
+            _context.UserLogs.Add(log);
+            await _context.SaveChangesAsync();
             return Ok(new { message = "Appointment cancelled successfully" });
         }
         
         [Authorize(Roles = "patient")]
-[HttpPut("reschedule-appointment")]
-public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppointmentRequest request)
-{
-    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
-        return Unauthorized(new { message = "Invalid token: no UserId" });
+        [HttpPut("reschedule-appointment")]
+        public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppointmentRequest request)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
+                return Unauthorized(new { message = "Invalid token: no UserId" });
 
-    var (ok, reason) = await _appointmentService.RescheduleAppointmentAsync(patientId, request);
+            var (ok, reason) = await _appointmentService.RescheduleAppointmentAsync(patientId, request);
 
-    if (!ok)
-        return BadRequest(new { message = reason });
+            if (!ok)
+                return BadRequest(new { message = reason });
+            // Log reschedule
+            var log = new UserLog
+            {
+                UserId = patientId,
+                Action = "reschedule",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {patientId} rescheduled an appointment."
+            };
+            _context.UserLogs.Add(log);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = reason });
+        }
 
-    return Ok(new { message = reason });
-}
-
-        
-   
-     
         [Authorize(Roles = "patient")]
         [HttpPost("book")]
         public async Task<IActionResult> BookAppointment([FromBody] BookingAppointmentRequest request)
@@ -178,14 +195,22 @@ public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppo
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
                 return Unauthorized(new { message = "Invalid token: no UserId" });
 
-    		var (success, reason) = await _appointmentService.BookAppointmentAsync(patientId, request);
+            var (success, reason) = await _appointmentService.BookAppointmentAsync(patientId, request);
 
- 			if (!success)
-        		return BadRequest(new { message = reason });
-    		return Ok(new { message = reason });
+            if (!success)
+                return BadRequest(new { message = reason });
+            // Log booking
+            var log = new UserLog
+            {
+                UserId = patientId,
+                Action = "book",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {patientId} booked an appointment."
+            };
+            _context.UserLogs.Add(log);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = reason });
         }
-        
-        
         
         [Authorize(Roles = "patient")] 
         [HttpGet("get-available-slots-for-doctor/{doctorId}")]
@@ -243,6 +268,32 @@ public async Task<IActionResult> RescheduleAppointment([FromBody] RescheduleAppo
             }
 
             return Ok(appointments);
+        }
+
+        [Authorize(Roles = "Doctor")]
+        [HttpPut("start-appointment/{appointmentId}")]
+        public async Task<IActionResult> StartAppointment(int appointmentId)
+        {
+            var doctorIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (doctorIdClaim == null)
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            if (!int.TryParse(doctorIdClaim.Value, out var doctorId))
+                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            // Here you would call your service to start the appointment (update status, etc.)
+            // For now, just log the action
+            var log = new UserLog
+            {
+                UserId = doctorId,
+                Action = "start",
+                Timestamp = DateTime.UtcNow,
+                Details = $"Doctor {doctorId} started appointment {appointmentId}."
+            };
+            _context.UserLogs.Add(log);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Appointment {appointmentId} started." });
         }
 
     }

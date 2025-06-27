@@ -109,6 +109,17 @@ namespace healthmate_backend.Services
             _context.Reminders.Add(reminder);
             await _context.SaveChangesAsync();
 
+            // Log reminder add
+            var log = new UserLog
+            {
+                UserId = patientId,
+                Action = "reminder",
+                Timestamp = DateTime.UtcNow,
+                Details = $"User {patientId} added a reminder (ID: {reminder.Id})."
+            };
+            _context.UserLogs.Add(log);
+            await _context.SaveChangesAsync();
+
             // Parse frequency like "8h" or "30m"
             TimeSpan frequencyInterval;
             string freq = reminder.Frequency?.Trim().ToLower();
