@@ -340,6 +340,32 @@ public async Task<IActionResult> TestDoctorsProfileImages()
     return Ok(doctorsWithImages);
 }
 
+[Authorize(Roles = "Doctor")]
+[HttpGet("{patientId}/details")]
+public async Task<IActionResult> GetPatientDetailsById(int patientId)
+{
+    var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == patientId);
+    if (patient == null)
+    {
+        return NotFound(new { message = "Patient not found" });
+    }
+
+    var patientDTO = new PatientDTO
+    {
+        Id = patient.Id,
+        Name = patient.Username,
+        Email = patient.Email,
+        DateOfBirth = patient.Birthdate,
+        BloodType = patient.BloodType,
+        Height = patient.Height,
+        Weight = patient.Weight,
+        Location = patient.Location,
+        ProfileImageUrl = patient.ProfileImageUrl
+    };
+
+    return Ok(patientDTO);
+}
+
 
 
 
