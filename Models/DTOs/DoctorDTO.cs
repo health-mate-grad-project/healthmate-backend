@@ -1,4 +1,6 @@
-﻿namespace healthmate_backend.Models
+﻿using healthmate_backend.Models.DTOs;
+
+namespace healthmate_backend.Models
 {
     public class DoctorDto
     {
@@ -12,6 +14,7 @@
         public int TotalRatings { get; set; }
     	public string Location { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public List<ClinicDto>? Clinics { get; set; }
     }
 
 }
