@@ -84,5 +84,36 @@ namespace healthmate_backend.Controllers
         }
 
         
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.NewPassword))
+                return BadRequest(new { error = "Email and new password are required." });
+
+            // Check if OTP is verified and not expired
+            var otpVerification = await _context.OtpVerifications
+                .Where(v => v.Email == request.Email && v.IsVerified && v.ExpiryTime > DateTime.UtcNow)
+                .OrderByDescending(v => v.ExpiryTime)
+                .FirstOrDefaultAsync();
+
+            if (otpVerification == null)
+                return BadRequest(new { error = "OTP not verified or expired." });
+
+            var user = await _authService.GetUserByEmailAsync(request.Email);
+            if (user == null)
+                return NotFound(new { error = "User not found." });
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Password reset successful." });
+        }
+        
+
+        public class ResetPasswordRequest
+        {
+            public string Email { get; set; }
+            public string NewPassword { get; set; }
+        }
     }
 }

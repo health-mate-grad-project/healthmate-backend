@@ -12,11 +12,13 @@ namespace healthmate_backend.Services
     {
         private readonly AppDbContext _context;
         private readonly string _jwtKey;
+        private readonly EmailService _emailService;
 
-        public AuthenticationService(AppDbContext context, IConfiguration config)
+        public AuthenticationService(AppDbContext context, IConfiguration config, EmailService emailService)
         {
             _context = context;
             _jwtKey = config["Jwt:Key"] ?? throw new ArgumentNullException(nameof(config), "JWT Key is not configured");
+            _emailService = emailService;
         }
 
 
@@ -109,6 +111,43 @@ namespace healthmate_backend.Services
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            Console.WriteLine($"SendPasswordResetEmailAsync called for email: {email}");
+            
+            var user = await GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                Console.WriteLine($"User not found for email: {email}");
+                return false;
+            }
+
+            Console.WriteLine($"User found: {user.Username} (ID: {user.Id})");
+
+            // Generate a dummy reset token (in production, use a secure token or JWT)
+            var resetToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            // In a real app, save the token to the DB and set an expiry, or use a JWT
+            var resetLink = $"https://your-frontend-url.com/reset-password?token={resetToken}";
+
+            var subject = "Health Mate - Password Reset Request";
+            var body = $"Dear {user.Username},\n\nWe received a request to reset your password. Please click the link below to reset your password:\n{resetLink}\n\nIf you did not request a password reset, please ignore this email.\n\nBest regards,\nThe Health Mate Team";
+
+            Console.WriteLine($"Attempting to send password reset email to: {user.Email}");
+
+            try
+            {
+                await _emailService.SendPasswordResetEmailAsync(user.Email, body);
+                Console.WriteLine($"Password reset email sent successfully to: {user.Email}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send password reset email to {user.Email}: {ex.Message}");
+                Console.WriteLine($"Exception details: {ex}");
+                return false;
+            }
         }
     }
 }

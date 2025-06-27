@@ -69,5 +69,45 @@ namespace healthmate_backend.Services
                 throw new Exception($"Failed to send email: {ex.Message}", ex);
             }
         }
+
+        public async Task SendPasswordResetEmailAsync(string toEmail, string body)
+        {
+            try
+            {
+                _logger.LogInformation($"Attempting to send password reset email to {toEmail}");
+                Console.WriteLine($"EmailService: Attempting to send password reset email to {toEmail}");
+                Console.WriteLine($"EmailService: SMTP Server: {_smtpServer}, Port: {_smtpPort}");
+                Console.WriteLine($"EmailService: Username: {_smtpUsername}, FromEmail: {_fromEmail}");
+
+                using var client = new SmtpClient(_smtpServer, _smtpPort)
+                {
+                    Credentials = new NetworkCredential(_smtpUsername, _smtpPassword),
+                    EnableSsl = _enableSsl,
+                    UseDefaultCredentials = _useDefaultCredentials
+                };
+
+                var message = new MailMessage
+                {
+                    From = new MailAddress(_fromEmail),
+                    Subject = "Health Mate - Password Reset Request",
+                    Body = body,
+                    IsBodyHtml = false
+                };
+                message.To.Add(toEmail);
+
+                Console.WriteLine($"EmailService: Sending email...");
+                await client.SendMailAsync(message);
+                Console.WriteLine($"EmailService: Email sent successfully to {toEmail}");
+                _logger.LogInformation($"Successfully sent password reset email to {toEmail}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"EmailService: Failed to send password reset email to {toEmail}");
+                Console.WriteLine($"EmailService: Error: {ex.Message}");
+                Console.WriteLine($"EmailService: Stack trace: {ex.StackTrace}");
+                _logger.LogError(ex, $"Failed to send password reset email to {toEmail}");
+                throw new Exception($"Failed to send email: {ex.Message}", ex);
+            }
+        }
     }
 } 
