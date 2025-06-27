@@ -209,6 +209,7 @@ namespace healthmate_backend.Services
             var doctorAppointments = await _context.Appointments
                 .Where(a => a.DoctorId == doctor.Id && a.IsRated && a.Rating.HasValue)
                 .ToListAsync();
+			doctorAppointments.Add(appointment);
 
             if (doctorAppointments.Any())
             {
