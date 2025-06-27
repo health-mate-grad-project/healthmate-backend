@@ -54,11 +54,14 @@ namespace healthmate_backend.Controllers
             }
         }
 
-        [HttpGet("user-logs")]
-        public async Task<IActionResult> GetAllUserLogs([FromServices] AppDbContext context)
+        [HttpGet("user-logs-login")]
+        public async Task<IActionResult> GetAllUserLoginLogs([FromServices] AppDbContext context)
         {
-            var logs = await context.UserLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
-            return Ok(logs);
+            var logs = await context.UserLogs
+                .Where(l => l.Action == "login")
+                .OrderByDescending(l => l.Timestamp)
+                .ToListAsync();
+            return Ok(new { message = "User login logs", logs });
         }
     }
 
