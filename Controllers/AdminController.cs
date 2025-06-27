@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using healthmate_backend.Services;
 using healthmate_backend.Models.Request;
+using healthmate_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace healthmate_backend.Controllers
 {
@@ -21,6 +23,7 @@ namespace healthmate_backend.Controllers
             var admin = await _adminService.AuthenticateAsync(request.Email, request.Password);
             if (admin == null)
                 return Unauthorized(new { message = "Invalid email or password" });
+            await _adminService.LogAdminActionAsync(admin.Id, "login", $"Admin {admin.Email} logged in.");
             return Ok(new { id = admin.Id, name = admin.Name, email = admin.Email });
         }
 
@@ -38,6 +41,17 @@ namespace healthmate_backend.Controllers
             if (!success)
                 return NotFound(new { message = "Clinic not found" });
             return Ok(new { message = "Clinic location updated successfully" });
+        }
+
+        [HttpGet("logs")]
+        public async Task<IActionResult> GetAdminLogs()
+        {
+            using (var scope = HttpContext.RequestServices.CreateScope())
+            {
+                var context = (AppDbContext)scope.ServiceProvider.GetService(typeof(AppDbContext));
+                var logs = await context.AdminLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
+                return Ok(logs);
+            }
         }
     }
 

@@ -33,5 +33,18 @@ namespace healthmate_backend.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task LogAdminActionAsync(int adminId, string action, string details)
+        {
+            var log = new AdminLog
+            {
+                AdminId = adminId,
+                Action = action,
+                Timestamp = DateTime.UtcNow,
+                Details = details
+            };
+            _context.AdminLogs.Add(log);
+            await _context.SaveChangesAsync();
+        }
     }
 } 
