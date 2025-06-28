@@ -213,8 +213,8 @@ namespace healthmate_backend.Services
                 Frequency         = request.Frequency,
                 Notes             = request.Notes,
                 Repeat            = request.Repeat,
-				CreatedAt = request.StartTime.ToUniversalTime(),
-    			LastSentAt        = request.StartTime.ToUniversalTime(), // optionally align with start
+				CreatedAt = request.StartTime,
+    			LastSentAt        = request.StartTime, // optionally align with start
                 PatientId         = request.PatientId.Value,
                 Patient           = patient,
                 CreatedByDoctorId = doctorId,
