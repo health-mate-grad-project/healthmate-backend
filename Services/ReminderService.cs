@@ -38,7 +38,7 @@ namespace healthmate_backend.Services
                     .ToListAsync();
 
                 var schedule = doses
-                    .Select(d => new ReminderDoseDto(d.Id, d.ScheduledUtc, d.Taken))
+                    .Select(d => new ReminderDoseDto(d.Id, TimeHelper.ToEgyptTime(d.ScheduledUtc), d.Taken))
                     .OrderBy(d => d.ScheduledUtc)
                     .ToList();
 
@@ -102,7 +102,7 @@ namespace healthmate_backend.Services
         }
 
         /* ────────────────────────────────────────────────────────────
-           HELPER – “upcoming” window
+           HELPER – "upcoming" window
         ──────────────────────────────────────────────────────────── */
         public async Task<List<ReminderDoseWindowDto>> GetUpcomingAsync(
             int patientId, DateTime startUtc, int days)
@@ -124,10 +124,9 @@ namespace healthmate_backend.Services
                         d.Reminder.MedicationName,
                         d.Reminder.Dosage,
                         d.Reminder.Notes,
-                        d.ScheduledUtc,
+                        TimeHelper.ToEgyptTime(d.ScheduledUtc),
                         d.Taken
                     ))
-
                 .OrderBy(d => d.ScheduledUtc)
                 .ToList();
         }
