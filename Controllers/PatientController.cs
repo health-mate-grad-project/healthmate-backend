@@ -183,6 +183,15 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
                 return NotFound(new { message = "Patient not found" });
             }
 
+            // Loyalty check: update IsLoyalCustomer if needed
+            int completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
+            bool shouldBeLoyal = completedCount >= 5;
+            if (patient.IsLoyalCustomer != shouldBeLoyal)
+            {
+                patient.IsLoyalCustomer = shouldBeLoyal;
+                await _context.SaveChangesAsync();
+            }
+
             // Map the patient model to PatientDTO
             var patientDTO = new PatientDTO
             {
