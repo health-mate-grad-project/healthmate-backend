@@ -183,14 +183,31 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
                 return NotFound(new { message = "Patient not found" });
             }
 
-            // Loyalty check: update IsLoyalCustomer if needed
+            // Loyalty check: update IsLoyalCustomer if needed and generate promo codes for every new multiple of 5
             int completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
             bool shouldBeLoyal = completedCount >= 5;
             if (patient.IsLoyalCustomer != shouldBeLoyal)
             {
                 patient.IsLoyalCustomer = shouldBeLoyal;
-                await _context.SaveChangesAsync();
             }
+            // Generate promo codes for every new multiple of 5 completed appointments
+            int promoCodesShouldHave = completedCount / 5;
+            int promoCodesHas = await _context.PromoCodes.CountAsync(pc => pc.PatientId == patient.Id);
+            for (int i = promoCodesHas; i < promoCodesShouldHave; i++)
+            {
+                var promoCode = new PromoCode
+                {
+                    Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
+                    ExpiryDate = DateTime.UtcNow.AddMonths(1),
+                    UsageLimit = 1,
+                    UsedCount = 0,
+                    Description = "Loyalty Discount: Use this code for a special discount!",
+                    PatientId = patient.Id,
+                    Patient = patient
+                };
+                _context.PromoCodes.Add(promoCode);
+            }
+            await _context.SaveChangesAsync();
 
             // Map the patient model to PatientDTO
             var patientDTO = new PatientDTO
