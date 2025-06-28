@@ -83,8 +83,9 @@ public class ReminderScheduler : BackgroundService
                 }
             }
 
-            var expiredReminders = reminders
-                .Where(r => now > r.CreatedAt.AddDays(r.Repeat)).ToList();
+           var expiredReminders = reminders
+    .Where(r => r.Repeat > 0 && now > r.CreatedAt.AddDays(r.Repeat))
+    .ToList();
 
             foreach (var expired in expiredReminders)
             {
