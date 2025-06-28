@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace healthmate_backend.Controllers
 {
-    [ApiController]
+       [ApiController]
     [Route("api/[controller]")]
     public class AuthenticationController : ControllerBase
     {

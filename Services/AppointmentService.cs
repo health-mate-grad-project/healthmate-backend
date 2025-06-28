@@ -409,16 +409,21 @@ namespace healthmate_backend.Services
             appointment.Status = "Completed";
             await _context.SaveChangesAsync();
 
-            // Loyalty logic
+            // Loyalty logic (option 2): always check and update loyalty and promo codes
             var patient = appointment.Patient;
             var completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
-            if (completedCount > 0 && completedCount % 5 == 0)
+            bool shouldBeLoyal = completedCount >= 5;
+            if (patient.IsLoyalCustomer != shouldBeLoyal)
             {
-                patient.IsLoyalCustomer = true;
-                // Generate promo code
+                patient.IsLoyalCustomer = shouldBeLoyal;
+            }
+            int promoCodesShouldHave = completedCount / 5;
+            int promoCodesHas = await _context.PromoCodes.CountAsync(pc => pc.PatientId == patient.Id);
+            for (int i = promoCodesHas; i < promoCodesShouldHave; i++)
+            {
                 var promoCode = new PromoCode
                 {
-                    Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0,8).ToUpper()}",
+                    Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
                     ExpiryDate = DateTime.UtcNow.AddMonths(1),
                     UsageLimit = 1,
                     UsedCount = 0,

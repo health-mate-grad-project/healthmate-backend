@@ -5,6 +5,7 @@ using healthmate_backend.Services;
 using healthmate_backend.Models;
 using healthmate_backend.Models.Request;
 using healthmate_backend.Models.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace healthmate_backend.Controllers
 {
@@ -17,14 +18,15 @@ namespace healthmate_backend.Controllers
         private readonly PatientService _patientService;
         private readonly DoctorService _doctorService;
 		private readonly GeoLocationService _geoLocationService;
+        private readonly ILogger<PatientController> _logger;
 
-        public PatientController(PatientService patientService, AppDbContext context,DoctorService doctorService,GeoLocationService geoLocationService)
+        public PatientController(PatientService patientService, AppDbContext context,DoctorService doctorService,GeoLocationService geoLocationService, ILogger<PatientController> logger)
         {
             _patientService = patientService;
             _context = context;
             _doctorService = doctorService;
 			_geoLocationService = geoLocationService;
-
+            _logger = logger;
         }
 
 
@@ -159,110 +161,75 @@ public async Task<IActionResult> SearchDoctors([FromBody] DoctorSearchRequest re
         }
         
         
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetPatientProfile()
-        {
-            // Assuming the patient is identified by the logged-in user's JWT token (e.g., via Claims)
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-            if (userIdClaim == null)
-            {
-                return Unauthorized(new { message = "Invalid token: no UserId" });
-            }
-
-            if (!int.TryParse(userIdClaim.Value, out var userId))
-            {
-                return Unauthorized(new { message = "Invalid token: UserId is not valid" });
-            }
-
-            var patient = await _context.Patients
-                .Where(p => p.Id == userId)
-                .FirstOrDefaultAsync();
-
-            if (patient == null)
-            {
-                return NotFound(new { message = "Patient not found" });
-            }
-
-            // Loyalty check: update IsLoyalCustomer if needed and generate promo codes for every new multiple of 5
-            int completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
-            bool shouldBeLoyal = completedCount >= 5;
-            if (patient.IsLoyalCustomer != shouldBeLoyal)
-            {
-                patient.IsLoyalCustomer = shouldBeLoyal;
-            }
-            // Generate promo codes for every new multiple of 5 completed appointments
-            int promoCodesShouldHave = completedCount / 5;
-            int promoCodesHas = await _context.PromoCodes.CountAsync(pc => pc.PatientId == patient.Id);
-            for (int i = promoCodesHas; i < promoCodesShouldHave; i++)
-            {
-                var promoCode = new PromoCode
-                {
-                    Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
-                    ExpiryDate = DateTime.UtcNow.AddMonths(1),
-                    UsageLimit = 1,
-                    UsedCount = 0,
-                    Description = "Loyalty Discount: Use this code for a special discount!",
-                    PatientId = patient.Id,
-                    Patient = patient
-                };
-                _context.PromoCodes.Add(promoCode);
-            }
-            await _context.SaveChangesAsync();
-
-            // Map the patient model to PatientDTO
-            var patientDTO = new PatientDTO
-            {
-                Id = patient.Id,
-                Name = patient.Username, // Assuming 'Username' is the name field
-                Email = patient.Email,
-                DateOfBirth = patient.Birthdate,
-                BloodType = patient.BloodType,
-                Height = patient.Height,
-                Weight = patient.Weight,
-                Location = patient.Location,
-                ProfileImageUrl = patient.ProfileImageUrl  // Add profile image URL
-            };
-
-            return Ok(patientDTO);
-        }
-        
         [HttpGet("user-profile")]
         public async Task<IActionResult> GetPUserProfile()
         {
-            // Assuming the patient is identified by the logged-in user's JWT token (e.g., via Claims)
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
-            {
                 return Unauthorized(new { message = "Invalid token: no UserId" });
-            }
 
             if (!int.TryParse(userIdClaim.Value, out var userId))
-            {
                 return Unauthorized(new { message = "Invalid token: UserId is not valid" });
+
+            // Try to fetch as a patient first
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == userId);
+            bool justBecameLoyal = false;
+
+            if (patient != null)
+            {
+                // Loyalty logic
+                int completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
+                bool shouldBeLoyal = completedCount >= 5;
+                if (patient.IsLoyalCustomer != shouldBeLoyal)
+                {
+                    patient.IsLoyalCustomer = shouldBeLoyal;
+                    if (shouldBeLoyal) justBecameLoyal = true;
+                }
+                int promoCodesShouldHave = completedCount / 5;
+                int promoCodesHas = await _context.PromoCodes.CountAsync(pc => pc.PatientId == patient.Id);
+                for (int i = promoCodesHas; i < promoCodesShouldHave; i++)
+                {
+                    var promoCode = new PromoCode
+                    {
+                        Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
+                        ExpiryDate = DateTime.UtcNow.AddMonths(1),
+                        UsageLimit = 1,
+                        UsedCount = 0,
+                        Description = "Loyalty Discount: Use this code for a special discount!",
+                        PatientId = patient.Id,
+                        Patient = patient
+                    };
+                    _context.PromoCodes.Add(promoCode);
+                }
+                await _context.SaveChangesAsync();
+
+                // Return patient info + loyalty flag
+                return Ok(new {
+                    id = patient.Id,
+                    username = patient.Username,
+                    email = patient.Email,
+                    type = "patient",
+                    profileImageUrl = patient.ProfileImageUrl,
+                    justBecameLoyal
+                });
             }
 
-            // Fetch user from the Users table using the userId
-            var user = await _context.Users
-                .Where(u => u.Id == userId)
-                .FirstOrDefaultAsync();
-
+            // Otherwise, try as a user (doctor, admin, etc.)
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
-            {
                 return NotFound(new { message = "User not found" });
-            }
 
-            // Map the user model to UserDTO
-            var userDTO = new UserDTO
-            {
-                Username = user.Username,  // Get the Username from the Users table
-                Password = user.Password,   // Get the Password (note: this is usually hashed in a real-world scenario)
-                Type = user.Type,   // Get type
-                Email = user.Email,  // Get the email
-                ProfileImageUrl = user.ProfileImageUrl  // Get the profile image URL
-            };
-
-            return Ok(userDTO);
+            return Ok(new {
+                id = user.Id,
+                username = user.Username,
+                email = user.Email,
+                type = user.Type,
+                profileImageUrl = user.ProfileImageUrl,
+                justBecameLoyal = false // Not applicable
+            });
         }
+
+        
         [Authorize(Roles = "patient")]
         [HttpGet("doctor-details/{doctorId}")]
         public async Task<IActionResult> GetDoctorDetails(int doctorId)
