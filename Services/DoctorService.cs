@@ -213,8 +213,8 @@ namespace healthmate_backend.Services
                 Frequency         = request.Frequency,
                 Notes             = request.Notes,
                 Repeat            = request.Repeat,
-				CreatedAt = request.StartTime.ToUniversalTime(),
-    			LastSentAt        = request.StartTime.ToUniversalTime(), // optionally align with start
+				CreatedAt = request.StartTime,
+    			LastSentAt        = request.StartTime, // optionally align with start
                 PatientId         = request.PatientId.Value,
                 Patient           = patient,
                 CreatedByDoctorId = doctorId,
@@ -260,6 +260,17 @@ namespace healthmate_backend.Services
             }
 
             _context.Doses.AddRange(doses);
+            await _context.SaveChangesAsync();
+
+            // Log reminder add by doctor
+            var log = new UserLog
+            {
+                UserId = doctorId,
+                Action = "reminder",
+                Timestamp = DateTime.UtcNow,
+                Details = $"Doctor {doctorId} added a reminder (ID: {reminder.Id}) for patient {patient.Id}."
+            };
+            _context.UserLogs.Add(log);
             await _context.SaveChangesAsync();
 
             return true;

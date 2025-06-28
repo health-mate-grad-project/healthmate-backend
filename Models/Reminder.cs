@@ -13,7 +13,7 @@ namespace healthmate_backend.Models
 
         public int Repeat { get; set; }    // default from ERD
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         // Receiver: Patient
         public int PatientId { get; set; }
