@@ -8,5 +8,8 @@
         public string Frequency { get; set; } = null!;
         public string Notes { get; set; } = null!;
         public int Repeat { get; set; }
+    	public DateTime StartTime { get; set; } 
+
+
     }
 }
