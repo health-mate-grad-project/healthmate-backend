@@ -12,9 +12,11 @@ namespace healthmate_backend.Controllers
     public class AdminController : ControllerBase
     {
         private readonly AdminService _adminService;
-        public AdminController(AdminService adminService)
+        private readonly AppDbContext _context;
+        public AdminController(AdminService adminService, AppDbContext context)
         {
             _adminService = adminService;
+            _context = context;
         }
 
         [HttpPost("login")]

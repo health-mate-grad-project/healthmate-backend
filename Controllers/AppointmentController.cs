@@ -296,6 +296,28 @@ namespace healthmate_backend.Controllers
             return Ok(new { message = $"Appointment {appointmentId} started." });
         }
 
+        [Authorize(Roles = "patient")]
+        [HttpGet("promocodes")]
+        public async Task<IActionResult> GetPromoCodes()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int patientId))
+                return Unauthorized(new { message = "Invalid token: no UserId" });
+
+            var patient = await _context.Patients.Include(p => p.PromoCodes).FirstOrDefaultAsync(p => p.Id == patientId);
+            if (patient == null)
+                return NotFound(new { message = "Patient not found" });
+
+            var promoCodes = patient.PromoCodes.Select(pc => new {
+                pc.Code,
+                pc.Description,
+                pc.ExpiryDate,
+                pc.UsageLimit,
+                pc.UsedCount
+            }).ToList();
+            return Ok(promoCodes);
+        }
+
     }
     
     

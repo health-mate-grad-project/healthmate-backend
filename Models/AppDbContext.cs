@@ -22,6 +22,8 @@ public class AppDbContext : DbContext
 
     public DbSet<UserLog> UserLogs { get; set; }
 
+    public DbSet<PromoCode> PromoCodes { get; set; }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

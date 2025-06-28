@@ -396,6 +396,41 @@ namespace healthmate_backend.Services
 
             return upcomingAppointments;
         }
+
+        public async Task<bool> CompleteAppointmentAsync(int appointmentId)
+        {
+            var appointment = await _context.Appointments.Include(a => a.Patient).FirstOrDefaultAsync(a => a.Id == appointmentId);
+            if (appointment == null)
+                return false;
+
+            if (appointment.Status == "Completed")
+                return true; // Already completed, treat as success
+
+            appointment.Status = "Completed";
+            await _context.SaveChangesAsync();
+
+            // Loyalty logic
+            var patient = appointment.Patient;
+            var completedCount = await _context.Appointments.CountAsync(a => a.PatientId == patient.Id && a.Status == "Completed");
+            if (completedCount > 0 && completedCount % 5 == 0)
+            {
+                patient.IsLoyalCustomer = true;
+                // Generate promo code
+                var promoCode = new PromoCode
+                {
+                    Code = $"LOYAL-{Guid.NewGuid().ToString().Substring(0,8).ToUpper()}",
+                    ExpiryDate = DateTime.UtcNow.AddMonths(1),
+                    UsageLimit = 1,
+                    UsedCount = 0,
+                    Description = "Loyalty Discount: Use this code for a special discount!",
+                    PatientId = patient.Id,
+                    Patient = patient
+                };
+                _context.PromoCodes.Add(promoCode);
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
     
    
