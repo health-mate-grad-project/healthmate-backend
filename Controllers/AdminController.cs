@@ -12,11 +12,9 @@ namespace healthmate_backend.Controllers
     public class AdminController : ControllerBase
     {
         private readonly AdminService _adminService;
-        private readonly AppDbContext _context;
-        public AdminController(AdminService adminService, AppDbContext context)
+        public AdminController(AdminService adminService)
         {
             _adminService = adminService;
-            _context = context;
         }
 
         [HttpPost("login")]
@@ -25,7 +23,7 @@ namespace healthmate_backend.Controllers
             var admin = await _adminService.AuthenticateAsync(request.Email, request.Password);
             if (admin == null)
                 return Unauthorized(new { message = "Invalid email or password" });
-            await _adminService.LogAdminActionAsync(admin.Id, "login", $"Admin {admin.Email} logged in.");
+           
             return Ok(new { id = admin.Id, name = admin.Name, email = admin.Email });
         }
 
@@ -45,15 +43,19 @@ namespace healthmate_backend.Controllers
             return Ok(new { message = "Clinic location updated successfully" });
         }
 
-        [HttpGet("logs")]
-        public async Task<IActionResult> GetAdminLogs()
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers([FromServices] AppDbContext context)
         {
-            using (var scope = HttpContext.RequestServices.CreateScope())
-            {
-                var context = (AppDbContext)scope.ServiceProvider.GetService(typeof(AppDbContext));
-                var logs = await context.AdminLogs.OrderByDescending(l => l.Timestamp).ToListAsync();
-                return Ok(logs);
-            }
+            var users = await context.Users
+                .Select(u => new {
+                    u.Id,
+                    u.Username,
+                    u.Email,
+                    u.Type,
+                    u.ProfileImageUrl
+                })
+                .ToListAsync();
+            return Ok(users);
         }
 
         [HttpGet("user-logs-login")]

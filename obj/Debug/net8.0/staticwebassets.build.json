@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "lSUWjy9IYYIH4mQTs0czxbHoPPpEdeE/l9TztBPaTyI=",
+  "Hash": "swE7rL7PDXNZq5iju5SBMmzM0N4kSfp9xuGpqUa3zLw=",
   "Source": "healthmate-backend",
   "BasePath": "_content/healthmate-backend",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }
