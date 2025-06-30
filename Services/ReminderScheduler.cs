@@ -33,18 +33,11 @@ public class ReminderScheduler : BackgroundService
             return TimeSpan.Zero;
 
         if (frequency.EndsWith("h"))
-        {
             return TimeSpan.FromHours(number);
-        }
         else if (frequency.EndsWith("m"))
-        {
             return TimeSpan.FromMinutes(number);
-        }
         else
-        {
-            // Default to hours if no unit
-            return TimeSpan.FromHours(number);
-        }
+            return TimeSpan.FromHours(number); // Default
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -61,21 +54,20 @@ public class ReminderScheduler : BackgroundService
             foreach (var reminder in reminders)
             {
                 var frequencyTimeSpan = ParseFrequency(reminder.Frequency);
-
                 if (frequencyTimeSpan == TimeSpan.Zero)
                     continue;
 
-                var repeatDays = reminder.Repeat;
                 var createdAt = reminder.CreatedAt;
-                var endDate = createdAt.AddDays(repeatDays);
-                if (DateTime.UtcNow > endDate)
+                var endDate = createdAt.AddDays(reminder.Repeat);
+
+                if (now > endDate)
                 {
-                    Console.WriteLine($"[Skip] Reminder {reminder.Id} expired after {repeatDays} days.");
+                    Console.WriteLine($"[Skip] Reminder {reminder.Id} expired after {reminder.Repeat} days.");
                     continue;
                 }
 
-                var lastSent = reminder.LastSentAt ?? reminder.CreatedAt;
-                if ((now - lastSent) >= frequencyTimeSpan)
+                if ((reminder.LastSentAt == null && now >= createdAt) ||
+                    (reminder.LastSentAt != null && (now - reminder.LastSentAt.Value) >= frequencyTimeSpan))
                 {
                     new ReminderPublisher().PublishReminder(reminder);
                     reminder.LastSentAt = now;
@@ -83,9 +75,10 @@ public class ReminderScheduler : BackgroundService
                 }
             }
 
-           var expiredReminders = reminders
-    .Where(r => r.Repeat > 0 && now > r.CreatedAt.AddDays(r.Repeat))
-    .ToList();
+            // Cleanup expired reminders
+            var expiredReminders = reminders
+                .Where(r => r.Repeat > 0 && now > r.CreatedAt.AddDays(r.Repeat))
+                .ToList();
 
             foreach (var expired in expiredReminders)
             {
@@ -94,9 +87,8 @@ public class ReminderScheduler : BackgroundService
                 _context.Reminders.Remove(expired);
                 Console.WriteLine($"[Cleanup] Deleted expired reminder for {expired.MedicationName}");
             }
-            await _context.SaveChangesAsync();
 
-            // Wait 1 minute
+            await _context.SaveChangesAsync();
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
     }

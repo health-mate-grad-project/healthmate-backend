@@ -214,7 +214,7 @@ namespace healthmate_backend.Services
                 Notes             = request.Notes,
                 Repeat            = request.Repeat,
 				CreatedAt         = request.StartTime.ToUniversalTime(),
-				LastSentAt        = request.StartTime.ToUniversalTime(),
+				LastSentAt        = null,
                 PatientId         = request.PatientId.Value,
                 Patient           = patient,
                 CreatedByDoctorId = doctorId,
