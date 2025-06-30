@@ -60,83 +60,94 @@ namespace healthmate_backend.Services
 
             return true;
         }
-        public async Task<List<AppointmentDTO>> GetAppointmentsForUserAsync(int userId, string userRole)
-        {
-            List<AppointmentDTO> appointments = new List<AppointmentDTO>();
+       public async Task<List<AppointmentDTO>> GetAppointmentsForUserAsync(int userId, string userRole)
+{
+    var currentDate = DateTime.UtcNow.Date;
 
-            if (userRole.ToLower() == "patient")
-            {
-                appointments = await _context.Appointments
-                    .Where(a => a.PatientId == userId)
-                    .Include(a => a.Doctor) // Include Doctor details
-                    .Include(a => a.Patient) // Include Patient details
-                    .Select(a => new AppointmentDTO
-                    {
-                        AppointmentId = a.Id,
-                        AppointmentType = a.AppointmentType,
-                        Date = a.Date,
-                        Status = a.Status,
-                        Time = a.Time,
-                        Content = a.Content,
-                        DoctorName = a.Doctor.Username,
-                        PatientName = a.Patient.Username,
-                        DoctorId = a.DoctorId,
-                        PatientId = a.PatientId,
-                        Speciality = a.Doctor.Speciality, // Include Doctor's speciality
-                        IsRated = a.IsRated,
-                        Rating = a.Rating,
-                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl, // Include Doctor's profile image URL
-                        Patient = new PatientBasicDTO
-                        {
-                            Id = a.Patient.Id,
-                            Username = a.Patient.Username,
-                            Email = a.Patient.Email,
-                            ProfileImageUrl = a.Patient.ProfileImageUrl
-                        }
-                    })
-                    .ToListAsync();
-            }
-            else if (userRole.ToLower() == "doctor")
-            {
-                appointments = await _context.Appointments
-                    .Where(a => a.DoctorId == userId)
-                    .Include(a => a.Doctor) // Include Doctor details
-                    .Include(a => a.Patient) // Include Patient details
-                    .Select(a => new AppointmentDTO
-                    {
-                        AppointmentId = a.Id,
-                        AppointmentType = a.AppointmentType,
-                        Date = a.Date,
-                        Status = a.Status,
-                        Time = a.Time,
-                        Content = a.Content,
-                        DoctorName = a.Doctor.Username,
-                        PatientName = a.Patient.Username,
-                        DoctorId = a.DoctorId,
-                        PatientId = a.PatientId,
-                        Speciality = a.Doctor.Speciality, // Include Doctor's speciality
-                        IsRated = a.IsRated,
-                        Rating = a.Rating,
-                        DoctorProfileImageUrl = a.Doctor.ProfileImageUrl, // Include Doctor's profile image URL
-                        Patient = new PatientBasicDTO
-                        {
-                            Id = a.Patient.Id,
-                            Username = a.Patient.Username,
-                            Email = a.Patient.Email,
-                            ProfileImageUrl = a.Patient.ProfileImageUrl
-                        }
-                    })
-                    .ToListAsync();
-            }
+    var expiredAppointments = await _context.Appointments
+        .Where(a => a.Date < currentDate && a.Status != "Cancelled")
+        .ToListAsync();
 
-            // Debug logging
-            foreach (var appointment in appointments)
-            {
-                Console.WriteLine($"Appointment {appointment.AppointmentId} - Doctor: {appointment.DoctorName} (ID: {appointment.DoctorId}) - ProfileImageUrl: {appointment.DoctorProfileImageUrl}");
-            }
+    foreach (var appt in expiredAppointments)
+    {
+        appt.Status = "Cancelled";
+    }
 
-            return appointments ?? new List<AppointmentDTO>();
-        }
+    if (expiredAppointments.Any())
+    {
+        await _context.SaveChangesAsync();
+    }
+
+    List<AppointmentDTO> appointments = new List<AppointmentDTO>();
+
+    if (userRole.ToLower() == "patient")
+    {
+        appointments = await _context.Appointments
+            .Where(a => a.PatientId == userId)
+            .Include(a => a.Doctor)
+            .Include(a => a.Patient)
+            .Select(a => new AppointmentDTO
+            {
+                AppointmentId = a.Id,
+                AppointmentType = a.AppointmentType,
+                Date = a.Date,
+                Status = a.Status,
+                Time = a.Time,
+                Content = a.Content,
+                DoctorName = a.Doctor.Username,
+                PatientName = a.Patient.Username,
+                DoctorId = a.DoctorId,
+                PatientId = a.PatientId,
+                Speciality = a.Doctor.Speciality,
+                IsRated = a.IsRated,
+                Rating = a.Rating,
+                DoctorProfileImageUrl = a.Doctor.ProfileImageUrl,
+                Patient = new PatientBasicDTO
+                {
+                    Id = a.Patient.Id,
+                    Username = a.Patient.Username,
+                    Email = a.Patient.Email,
+                    ProfileImageUrl = a.Patient.ProfileImageUrl
+                }
+            })
+            .ToListAsync();
+    }
+    else if (userRole.ToLower() == "doctor")
+    {
+        appointments = await _context.Appointments
+            .Where(a => a.DoctorId == userId)
+            .Include(a => a.Doctor)
+            .Include(a => a.Patient)
+            .Select(a => new AppointmentDTO
+            {
+                AppointmentId = a.Id,
+                AppointmentType = a.AppointmentType,
+                Date = a.Date,
+                Status = a.Status,
+                Time = a.Time,
+                Content = a.Content,
+                DoctorName = a.Doctor.Username,
+                PatientName = a.Patient.Username,
+                DoctorId = a.DoctorId,
+                PatientId = a.PatientId,
+                Speciality = a.Doctor.Speciality,
+                IsRated = a.IsRated,
+                Rating = a.Rating,
+                DoctorProfileImageUrl = a.Doctor.ProfileImageUrl,
+                Patient = new PatientBasicDTO
+                {
+                    Id = a.Patient.Id,
+                    Username = a.Patient.Username,
+                    Email = a.Patient.Email,
+                    ProfileImageUrl = a.Patient.ProfileImageUrl
+                }
+            })
+            .ToListAsync();
+    }
+
+    return appointments ?? new List<AppointmentDTO>();
+}
+
 
         public async Task<List<AppointmentDTO>> GetPastAppointmentsForPatientAsync(int patientId)
         {
