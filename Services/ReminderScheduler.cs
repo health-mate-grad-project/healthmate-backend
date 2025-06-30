@@ -54,25 +54,34 @@ public class ReminderScheduler : BackgroundService
             foreach (var reminder in reminders)
             {
                 var frequencyTimeSpan = ParseFrequency(reminder.Frequency);
-                if (frequencyTimeSpan == TimeSpan.Zero)
-                    continue;
+if (frequencyTimeSpan == TimeSpan.Zero)
+    continue;
 
-                var createdAt = reminder.CreatedAt;
-                var endDate = createdAt.AddDays(reminder.Repeat);
+var createdAt = reminder.CreatedAt;
+var endDate = createdAt.AddDays(reminder.Repeat);
+if (now < createdAt)
+    {
+        Console.WriteLine($"[Skip] Reminder {reminder.Id} not started yet");
+        continue;
+    }
+if (now > endDate)
+{
+    Console.WriteLine($"[Skip] Reminder {reminder.Id} expired after {reminder.Repeat} days.");
+    continue;
+}
 
-                if (now > endDate)
-                {
-                    Console.WriteLine($"[Skip] Reminder {reminder.Id} expired after {reminder.Repeat} days.");
-                    continue;
-                }
+// Calculate how many full intervals passed since CreatedAt
+var intervalsPassed = (int)((now - createdAt).TotalMinutes / frequencyTimeSpan.TotalMinutes);
+var expectedDueTime = createdAt.AddMinutes(intervalsPassed * frequencyTimeSpan.TotalMinutes);
 
-                if ((reminder.LastSentAt == null && now >= createdAt) ||
-                    (reminder.LastSentAt != null && (now - reminder.LastSentAt.Value) >= frequencyTimeSpan))
-                {
-                    new ReminderPublisher().PublishReminder(reminder);
-                    reminder.LastSentAt = now;
-                    Console.WriteLine($"[Due] Reminder for {reminder.MedicationName} (Patient {reminder.PatientId}) is due.");
-                }
+// Only send if LastSentAt is before expectedDueTime
+if (reminder.LastSentAt == null || reminder.LastSentAt < expectedDueTime)
+{
+    new ReminderPublisher().PublishReminder(reminder);
+    reminder.LastSentAt = expectedDueTime; // Keep it aligned
+    Console.WriteLine($"[Due] Reminder for {reminder.MedicationName} (Patient {reminder.PatientId}) is due.");
+}
+
             }
 
             // Cleanup expired reminders
