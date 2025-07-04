@@ -79,9 +79,7 @@ namespace healthmate_backend.Services
 
         public async Task<string> LogoutAsync()
 
-        {
-            // In a real application, you'd invalidate the token here
-            return "Logged out successfully";
+        { return "Logged out successfully";
         }
 
 

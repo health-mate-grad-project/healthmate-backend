@@ -19,7 +19,6 @@ public class ReminderScheduler : BackgroundService
         _serviceProvider = serviceProvider;
     }
 
-    // Parse frequency string like "30m", "4h", or just "2" (default to hours)
     private TimeSpan ParseFrequency(string frequency)
     {
         if (string.IsNullOrWhiteSpace(frequency))
@@ -27,7 +26,6 @@ public class ReminderScheduler : BackgroundService
 
         frequency = frequency.Trim().ToLower();
 
-        // Extract numeric part
         var numberStr = new string(frequency.Where(char.IsDigit).ToArray());
         if (!int.TryParse(numberStr, out int number))
             return TimeSpan.Zero;

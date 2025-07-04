@@ -15,9 +15,7 @@ namespace healthmate_backend.Services
         private readonly AppDbContext _db;
         public ReminderService(AppDbContext db) => _db = db;
 
-        /* ────────────────────────────────────────────────────────────
-           PUBLIC API
-        ──────────────────────────────────────────────────────────── */
+
         public async Task<List<ReminderTodayDto>> GetTodayAsync(int patientId, DateTime dayUtc)
         {
             var midnight = dayUtc.Date;
@@ -75,9 +73,7 @@ namespace healthmate_backend.Services
             return true;
         }
 
-        /* ────────────────────────────────────────────────────────────
-           HELPER – per-day schedule
-        ──────────────────────────────────────────────────────────── */
+        
         private static List<DateTime> BuildScheduleForDay(
             Reminder r,
             DateTime startUtc,
@@ -101,9 +97,7 @@ namespace healthmate_backend.Services
             return list;
         }
 
-        /* ────────────────────────────────────────────────────────────
-           HELPER – "upcoming" window
-        ──────────────────────────────────────────────────────────── */
+ 
         public async Task<List<ReminderDoseWindowDto>> GetUpcomingAsync(
             int patientId, DateTime startUtc, int days)
         {
@@ -130,15 +124,12 @@ namespace healthmate_backend.Services
                 .OrderBy(d => d.ScheduledUtc)
                 .ToList();
         }
-        /* ────────────────────────────────────────────────────────────
-           PARSE FREQUENCY → MINUTES
-        ──────────────────────────────────────────────────────────── */
+      
         private static int GetIntervalMinutes(string frequency)
         {
             if (string.IsNullOrWhiteSpace(frequency)) return 0;
             frequency = frequency.ToLowerInvariant().Trim();
 
-            // e.g. "every 8 hours", "8h", "8 hr"
             var hourMatch = Regex.Match(frequency, @"(\d+)\s*(hour|hr|h)");
             if (hourMatch.Success)                     // ← FIX
             {
@@ -146,18 +137,15 @@ namespace healthmate_backend.Services
                 return n * 60;
             }
 
-            // "once daily"
             if (frequency.Contains("once"))
                 return 24 * 60;
 
-            // If it's JUST a number → interpret as hours  ← FIX
             if (Regex.IsMatch(frequency, @"^\d+$"))
             {
                 int n = int.Parse(frequency);
                 return n * 60;
             }
 
-            // legacy: "4 times per day", "4/day"
             var perDay = Regex.Match(frequency, @"(\d+)\s*(x|/)");
             if (perDay.Success)
             {
@@ -165,7 +153,7 @@ namespace healthmate_backend.Services
                 return n == 0 ? 0 : (24 * 60 / n);
             }
 
-            return 0; // unsupported format
+            return 0; 
         }
     }
 }
