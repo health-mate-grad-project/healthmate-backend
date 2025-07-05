@@ -62,18 +62,14 @@ namespace healthmate_backend.Services
         }
        public async Task<List<AppointmentDTO>> GetAppointmentsForUserAsync(int userId, string userRole)
 {
-    var now = DateTime.UtcNow;
+    var currentDate = DateTime.UtcNow.Date;
 
+    // Only expire appointments that are in the past and not Completed or Cancelled
     var expiredAppointments = await _context.Appointments
-        .Where(a =>
-            a.Status != "Cancelled" &&
-            a.Status != "Completed" &&
-            (
-                a.Date < now.Date || 
-                (a.Date == now.Date && a.Time.HasValue && a.Date.Add(a.Time.Value).AddMinutes(5) <= now)
-            )
-        )
+        .Where(a => a.Date < currentDate && a.Status != "Cancelled" && a.Status != "Completed")
         .ToListAsync();
+
+
 
     foreach (var appt in expiredAppointments)
     {
